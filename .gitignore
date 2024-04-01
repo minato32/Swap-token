@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+
+# Environment variables (NEVER commit secrets)
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Hardhat / Solidity
+contracts/artifacts/
+contracts/cache/
+contracts/typechain-types/
+contracts/ignition/deployments/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Coverage
+coverage/
+coverage.json
+
+# Misc
+*.tsbuildinfo
+
+# Project brain (local documentation)
+.brain/
+
+# Claude Code
+CLAUDE.md
+
+
