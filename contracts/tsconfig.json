@@ -13,12 +13,12 @@
   "include": [
     "./hardhat.config.ts",
     "./test/**/*.ts",
-    "./ignition/**/*.ts"
+    "./ignition/**/*.ts",
+    "./typechain-types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
     "artifacts",
-    "cache",
-    "typechain-types"
+    "cache"
   ]
 }
