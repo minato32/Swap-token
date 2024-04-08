@@ -30,7 +30,7 @@ interface ILayerZeroEndpoint {
  */
 contract BridgeAdapter is Ownable, ReentrancyGuard {
     /// @notice The LayerZero endpoint contract on this chain
-    ILayerZeroEndpoint public lzEndpoint;
+    ILayerZeroEndpoint public immutable lzEndpoint;
 
     /// @notice Mapping of LayerZero chain ID to trusted remote contract address
     mapping(uint16 => bytes) public trustedRemotes;
