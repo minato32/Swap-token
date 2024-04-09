@@ -22,6 +22,9 @@ contract FeeManager is Ownable {
     /// @notice Address that receives withdrawn fees
     address public treasury;
 
+    /// @notice Address of the SwapRouter contract
+    address public swapRouter;
+
     /// @notice Accumulated fees per token
     mapping(address => uint256) public collectedFees;
 
@@ -33,6 +36,9 @@ contract FeeManager is Ownable {
     error ZeroAmount();
     error TreasuryNotSet();
     error InsufficientFees();
+    error OnlySwapRouter();
+
+    event SwapRouterUpdated(address indexed oldRouter, address indexed newRouter);
 
     /**
      * @notice Initialize with a treasury address
@@ -58,6 +64,7 @@ contract FeeManager is Ownable {
      * @param _amount Amount of fees collected
      */
     function collectFee(address _token, uint256 _amount) external {
+        if (msg.sender != swapRouter) revert OnlySwapRouter();
         if (_token == address(0)) revert ZeroAddress();
         if (_amount == 0) revert ZeroAmount();
 
@@ -92,5 +99,16 @@ contract FeeManager is Ownable {
         address old = treasury;
         treasury = _treasury;
         emit TreasuryUpdated(old, _treasury);
+    }
+
+    /**
+     * @notice Set the SwapRouter contract address
+     * @param _swapRouter Address of the deployed SwapRouter
+     */
+    function setSwapRouter(address _swapRouter) external onlyOwner {
+        if (_swapRouter == address(0)) revert ZeroAddress();
+        address old = swapRouter;
+        swapRouter = _swapRouter;
+        emit SwapRouterUpdated(old, _swapRouter);
     }
 }

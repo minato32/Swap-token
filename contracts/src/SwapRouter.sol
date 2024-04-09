@@ -5,13 +5,14 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 
 /**
  * @title SwapRouter
  * @author CrossChain Swap System
  * @notice Main entry point for cross-chain token swaps
  */
-contract SwapRouter is Ownable, ReentrancyGuard {
+contract SwapRouter is Ownable, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
 
     /// @notice Address of the BridgeAdapter contract
@@ -25,6 +26,9 @@ contract SwapRouter is Ownable, ReentrancyGuard {
 
     /// @notice Maximum allowed slippage in basis points (100 = 1%)
     uint256 public maxSlippageBps = 100;
+
+    /// @notice Maximum swap amount per transaction (prevents whale manipulation)
+    uint256 public maxSwapAmount = 1_000_000 * 1e18;
 
     event SwapInitiated(
         address indexed sender,
@@ -49,6 +53,9 @@ contract SwapRouter is Ownable, ReentrancyGuard {
     error TokenVaultNotSet();
     error FeeManagerNotSet();
     error SlippageTooHigh();
+    error SwapAmountTooLarge();
+
+    event MaxSwapAmountUpdated(uint256 oldAmount, uint256 newAmount);
 
     constructor() Ownable(msg.sender) {}
 
@@ -66,8 +73,9 @@ contract SwapRouter is Ownable, ReentrancyGuard {
         uint256 destChainId,
         address recipient,
         uint256 minAmountOut
-    ) external nonReentrant {
+    ) external nonReentrant whenNotPaused {
         if (amount == 0) revert ZeroAmount();
+        if (amount > maxSwapAmount) revert SwapAmountTooLarge();
         if (token == address(0)) revert ZeroAddress();
         if (recipient == address(0)) revert ZeroAddress();
         if (destChainId == 0 || destChainId == block.chainid) revert InvalidChainId();
@@ -152,5 +160,26 @@ contract SwapRouter is Ownable, ReentrancyGuard {
         uint256 old = maxSlippageBps;
         maxSlippageBps = _maxSlippageBps;
         emit MaxSlippageUpdated(old, _maxSlippageBps);
+    }
+
+    /**
+     * @notice Update the maximum swap amount per transaction
+     * @param _maxSwapAmount New maximum swap amount
+     */
+    function setMaxSwapAmount(uint256 _maxSwapAmount) external onlyOwner {
+        if (_maxSwapAmount == 0) revert ZeroAmount();
+        uint256 old = maxSwapAmount;
+        maxSwapAmount = _maxSwapAmount;
+        emit MaxSwapAmountUpdated(old, _maxSwapAmount);
+    }
+
+    /// @notice Pause the contract in case of emergency
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    /// @notice Resume contract operations
+    function unpause() external onlyOwner {
+        _unpause();
     }
 }

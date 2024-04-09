@@ -5,13 +5,14 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 
 /**
  * @title TokenVault
  * @author CrossChain Swap System
  * @notice Locks ERC20 tokens during cross-chain swaps with a 30-minute refund timeout
  */
-contract TokenVault is Ownable, ReentrancyGuard {
+contract TokenVault is Ownable, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
 
     /// @notice Duration after which a deposit becomes refundable
@@ -22,6 +23,12 @@ contract TokenVault is Ownable, ReentrancyGuard {
 
     /// @notice Address of the BridgeAdapter contract
     address public bridgeAdapter;
+
+    /// @notice Maximum total deposit allowed per token (prevents concentration risk)
+    mapping(address => uint256) public maxDepositCap;
+
+    /// @notice Current total locked amount per token
+    mapping(address => uint256) public totalLocked;
 
     struct Deposit {
         address token;
@@ -67,6 +74,9 @@ contract TokenVault is Ownable, ReentrancyGuard {
     error DepositAlreadyRefunded();
     error LockNotExpired();
     error OnlyDepositor();
+    error DepositCapExceeded();
+
+    event MaxDepositCapUpdated(address indexed token, uint256 oldCap, uint256 newCap);
 
     constructor() Ownable(msg.sender) {}
 
@@ -82,11 +92,16 @@ contract TokenVault is Ownable, ReentrancyGuard {
         address _token,
         uint256 _amount,
         address _sender
-    ) external nonReentrant {
+    ) external nonReentrant whenNotPaused {
         if (msg.sender != swapRouter) revert OnlySwapRouter();
         if (_token == address(0)) revert ZeroAddress();
         if (_amount == 0) revert ZeroAmount();
         if (deposits[_depositId].timestamp != 0) revert DepositAlreadyExists();
+
+        uint256 cap = maxDepositCap[_token];
+        if (cap > 0 && totalLocked[_token] + _amount > cap) revert DepositCapExceeded();
+
+        totalLocked[_token] += _amount;
 
         deposits[_depositId] = Deposit({
             token: _token,
@@ -120,6 +135,7 @@ contract TokenVault is Ownable, ReentrancyGuard {
         if (deposit.refunded) revert DepositAlreadyRefunded();
 
         deposit.released = true;
+        totalLocked[deposit.token] -= deposit.amount;
 
         IERC20(deposit.token).safeTransfer(_recipient, deposit.amount);
 
@@ -139,6 +155,7 @@ contract TokenVault is Ownable, ReentrancyGuard {
         if (block.timestamp < deposit.timestamp + LOCK_DURATION) revert LockNotExpired();
 
         deposit.refunded = true;
+        totalLocked[deposit.token] -= deposit.amount;
 
         IERC20(deposit.token).safeTransfer(deposit.sender, deposit.amount);
 
@@ -165,5 +182,27 @@ contract TokenVault is Ownable, ReentrancyGuard {
         address old = bridgeAdapter;
         bridgeAdapter = _bridgeAdapter;
         emit BridgeAdapterUpdated(old, _bridgeAdapter);
+    }
+
+    /**
+     * @notice Set the maximum deposit cap for a token
+     * @param _token Address of the ERC20 token
+     * @param _cap Maximum total deposit allowed (0 = unlimited)
+     */
+    function setMaxDepositCap(address _token, uint256 _cap) external onlyOwner {
+        if (_token == address(0)) revert ZeroAddress();
+        uint256 old = maxDepositCap[_token];
+        maxDepositCap[_token] = _cap;
+        emit MaxDepositCapUpdated(_token, old, _cap);
+    }
+
+    /// @notice Pause the contract in case of emergency
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    /// @notice Resume contract operations
+    function unpause() external onlyOwner {
+        _unpause();
     }
 }
