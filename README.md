@@ -11,7 +11,7 @@ CrossChain Swap System allows users to initiate token swaps from one blockchain 
 | Network | Chain ID | Type |
 |---------|----------|------|
 | Ethereum Sepolia | 11155111 | Testnet |
-| Polygon Mumbai | 80001 | Testnet |
+| Polygon Amoy | 80002 | Testnet |
 | BSC Testnet | 97 | Testnet |
 
 ## Architecture
@@ -104,7 +104,7 @@ CrossChain Swap System allows users to initiate token swaps from one blockchain 
 
 - Node.js 18 LTS
 - MetaMask wallet
-- Alchemy API keys (Sepolia, Mumbai, BSC Testnet)
+- Alchemy API keys (Sepolia, Amoy, BSC Testnet)
 - Testnet tokens (ETH, MATIC, BNB)
 
 ### Installation
@@ -132,7 +132,7 @@ npx hardhat test
 
 ```
 ALCHEMY_SEPOLIA_URL=       # Alchemy RPC URL for Sepolia
-ALCHEMY_MUMBAI_URL=        # Alchemy RPC URL for Mumbai
+ALCHEMY_AMOY_URL=          # Alchemy RPC URL for Polygon Amoy
 ALCHEMY_BSC_URL=           # Alchemy RPC URL for BSC Testnet
 PRIVATE_KEY=               # Deployer wallet private key
 ```

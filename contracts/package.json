@@ -7,7 +7,7 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "deploy:sepolia": "hardhat ignition deploy ignition/modules/deploy.ts --network sepolia",
-    "deploy:mumbai": "hardhat ignition deploy ignition/modules/deploy.ts --network mumbai",
+    "deploy:amoy": "hardhat ignition deploy ignition/modules/deploy.ts --network amoy",
     "clean": "hardhat clean"
   },
   "devDependencies": {
