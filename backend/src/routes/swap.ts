@@ -9,9 +9,17 @@ const router = Router();
 const supportedChains = getSupportedChains();
 
 const validateSwap = [
-  body("fromToken").isString().notEmpty().withMessage("fromToken is required"),
-  body("toToken").isString().notEmpty().withMessage("toToken is required"),
-  body("amount").isNumeric().withMessage("amount must be a number"),
+  body("fromToken")
+    .isString()
+    .matches(/^0x[a-fA-F0-9]{40}$/)
+    .withMessage("fromToken must be a valid Ethereum address"),
+  body("toToken")
+    .isString()
+    .matches(/^0x[a-fA-F0-9]{40}$/)
+    .withMessage("toToken must be a valid Ethereum address"),
+  body("amount")
+    .isFloat({ min: 0.000001, max: 1e18 })
+    .withMessage("amount must be a positive number"),
   body("fromChain")
     .isString()
     .isIn(supportedChains)
@@ -20,8 +28,13 @@ const validateSwap = [
     .isString()
     .isIn(supportedChains)
     .withMessage(`toChain must be one of: ${supportedChains.join(", ")}`),
-  body("recipient").isString().notEmpty().withMessage("recipient address is required"),
-  body("minAmountOut").isNumeric().withMessage("minAmountOut must be a number"),
+  body("recipient")
+    .isString()
+    .matches(/^0x[a-fA-F0-9]{40}$/)
+    .withMessage("recipient must be a valid Ethereum address"),
+  body("minAmountOut")
+    .isFloat({ min: 0 })
+    .withMessage("minAmountOut must be a positive number"),
 ];
 
 router.post("/", validateSwap, async (req: Request, res: Response, next: NextFunction) => {

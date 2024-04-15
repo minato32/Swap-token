@@ -9,9 +9,17 @@ const router = Router();
 const supportedChains = getSupportedChains();
 
 const validateQuote = [
-  query("fromToken").isString().notEmpty().withMessage("fromToken is required"),
-  query("toToken").isString().notEmpty().withMessage("toToken is required"),
-  query("amount").isNumeric().withMessage("amount must be a number"),
+  query("fromToken")
+    .isString()
+    .matches(/^0x[a-fA-F0-9]{40}$/)
+    .withMessage("fromToken must be a valid Ethereum address"),
+  query("toToken")
+    .isString()
+    .matches(/^0x[a-fA-F0-9]{40}$/)
+    .withMessage("toToken must be a valid Ethereum address"),
+  query("amount")
+    .isFloat({ min: 0.000001, max: 1e18 })
+    .withMessage("amount must be a positive number"),
   query("fromChain")
     .isString()
     .isIn(supportedChains)

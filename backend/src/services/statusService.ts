@@ -21,7 +21,28 @@ const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 5000;
 const TIMEOUT_MS = 5 * 60 * 1000;
 
+const MAX_CACHE_SIZE = 1000;
+const CACHE_TTL_MS = 30 * 60 * 1000;
 const statusCache: Record<string, StatusResult> = {};
+
+function evictStaleEntries(): void {
+  const now = Date.now();
+  const keys = Object.keys(statusCache);
+
+  for (const key of keys) {
+    if (now - statusCache[key].timestamp > CACHE_TTL_MS) {
+      delete statusCache[key];
+    }
+  }
+
+  const remaining = Object.keys(statusCache);
+  if (remaining.length > MAX_CACHE_SIZE) {
+    const excess = remaining.length - MAX_CACHE_SIZE;
+    for (let i = 0; i < excess; i++) {
+      delete statusCache[remaining[i]];
+    }
+  }
+}
 
 export async function getTransactionStatus(
   txHash: string,
@@ -30,6 +51,8 @@ export async function getTransactionStatus(
 ): Promise<StatusResult> {
   const cached = statusCache[txHash];
   if (cached && cached.status === "DELIVERED") return cached;
+
+  evictStaleEntries();
 
   const result = await pollWithRetry(txHash, srcChain, dstChain);
   statusCache[txHash] = result;

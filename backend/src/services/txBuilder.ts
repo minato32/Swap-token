@@ -27,10 +27,10 @@ export async function buildSwapTransaction(
   const sourceChain = getChainConfig(fromChain);
   const destChain = getChainConfig(toChain);
 
-  if (!sourceChain) throw new Error(`Unsupported source chain: ${fromChain}`);
-  if (!destChain) throw new Error(`Unsupported destination chain: ${toChain}`);
+  if (!sourceChain) throw new Error("Unsupported source chain");
+  if (!destChain) throw new Error("Unsupported destination chain");
   if (!sourceChain.swapRouterAddress) {
-    throw new Error(`SwapRouter not deployed on ${fromChain}`);
+    throw new Error("SwapRouter not available on the selected chain");
   }
 
   const provider = getProvider(fromChain);
