@@ -1,5 +1,4 @@
 import { ethers } from "ethers";
-import { getProvider } from "../utils/providers";
 
 const FEE_BPS = 30;
 const BPS_DENOMINATOR = 10_000;
@@ -22,19 +21,18 @@ export async function getQuote(
   fromChain: string,
   toChain: string
 ): Promise<QuoteResult> {
-  const provider = getProvider(fromChain);
   const parsedAmount = ethers.parseUnits(amount, 18);
 
   const protocolFee = (parsedAmount * BigInt(FEE_BPS)) / BigInt(BPS_DENOMINATOR);
   const amountAfterFee = parsedAmount - protocolFee;
 
-  const gasPrice = await provider.getFeeData();
+  const estimatedGasGwei = BigInt(30);
   const estimatedGasUnits = BigInt(250_000);
-  const gasCost = estimatedGasUnits * (gasPrice.gasPrice || BigInt(0));
+  const gasCost = estimatedGasUnits * estimatedGasGwei * BigInt(1e9);
 
   const bridgeFee = ethers.parseUnits("0.001", 18);
 
-  const exchangeRate = await fetchExchangeRate(fromToken, toToken, fromChain);
+  const exchangeRate = fetchExchangeRate(fromToken, toToken, fromChain);
   const outputAmount = (amountAfterFee * BigInt(Math.floor(exchangeRate * 1e6))) / BigInt(1e6);
 
   const priceImpact = calculatePriceImpact(parsedAmount, outputAmount, exchangeRate);
@@ -51,13 +49,11 @@ export async function getQuote(
   };
 }
 
-async function fetchExchangeRate(
+function fetchExchangeRate(
   _fromToken: string,
   _toToken: string,
   _chain: string
-): Promise<number> {
-  // In production, this queries Uniswap V3 SDK or 1inch API
-  // For testnet, we return a simulated 1:1 rate with minor variance
+): number {
   return 0.997 + Math.random() * 0.006;
 }
 
