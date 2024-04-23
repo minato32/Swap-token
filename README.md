@@ -70,7 +70,7 @@ CrossChain Swap System allows users to initiate token swaps from one blockchain 
 - **30-minute timeout** with user-initiated refund for failed transfers
 - **Emergency pause** (circuit breaker) on SwapRouter and TokenVault
 - **Max swap amount** per transaction to prevent whale manipulation
-- **Deposit cap per token** to prevent concentration risk (Venus attack mitigation)
+- **Deposit cap per token** to prevent concentration risk and supply manipulation
 - **Donation attack immunity** — mapping-based accounting, not balanceOf()
 - **Chainlink-ready price oracle** with staleness and deviation checks
 - **24-hour timelock** on all admin configuration changes
@@ -237,12 +237,12 @@ npx hardhat test
 
 ## Security Design Rationale
 
-This protocol's security architecture was specifically designed to mitigate real-world DeFi attack vectors, including the **Venus Protocol March 2026 exploit** ($3.7M stolen via donation attack + oracle manipulation). Key mitigations include:
+This protocol's security architecture was specifically designed to mitigate well-documented DeFi attack vectors observed across major protocol exploits (Compound forks, bridge hacks, oracle manipulation incidents). Key mitigations include:
 
-- **Donation attack immunity** — TokenVault uses explicit deposit tracking via mappings, not `balanceOf()`, making it immune to exchange rate inflation via direct token transfers
-- **Concentration limits** — Per-token deposit caps prevent any single entity from accumulating excessive protocol exposure
-- **Oracle hardening** — Chainlink integration with staleness thresholds and price deviation detection prevents price manipulation loops
-- **Admin delay** — 24-hour timelock gives the community reaction time if owner keys are compromised
+- **Donation attack immunity** — TokenVault uses explicit deposit tracking via mappings, not `balanceOf()`, making it immune to exchange rate inflation via direct token transfers (a known vulnerability in Compound-forked lending protocols)
+- **Concentration limits** — Per-token deposit caps prevent any single entity from accumulating excessive protocol exposure, mitigating supply manipulation risks
+- **Oracle hardening** — Chainlink integration with staleness thresholds and price deviation detection prevents price manipulation loops commonly used in DeFi exploits
+- **Admin delay** — 24-hour timelock gives the community reaction time if owner keys are compromised, preventing instant rug pulls
 - **Activity surveillance** — On-chain monitoring detects and flags anomalous trading patterns before damage escalates
 
 ## License
