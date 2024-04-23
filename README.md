@@ -16,18 +16,7 @@ CrossChain Swap System allows users to initiate token swaps from one blockchain 
 
 ## Architecture
 
-```
-┌──────────────┐     ┌──────────────┐     ┌──────────────────┐
-│   Frontend    │────▶│   Backend    │────▶│  Smart Contracts │
-│  Next.js 14   │     │  Express API │     │    Solidity      │
-│  wagmi + RKit │     │  ethers v6   │     │  OpenZeppelin v5 │
-└──────────────┘     └──────────────┘     └──────────────────┘
-                                                   │
-                                          ┌────────┴────────┐
-                                          │   LayerZero      │
-                                          │  Cross-Chain Msg │
-                                          └─────────────────┘
-```
+![CrossChain Swap System Architecture](docs/architecture.svg)
 
 ### Swap Flow
 
