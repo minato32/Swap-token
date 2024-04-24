@@ -7,10 +7,43 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 
+interface ITokenVault {
+    function lockTokens(bytes32 _depositId, address _token, uint256 _amount, address _sender) external;
+}
+
+interface IBridgeAdapter {
+    function sendBridgeMessage(
+        uint32 _dstEid,
+        address _token,
+        uint256 _amount,
+        address _recipient,
+        bytes32 _depositId,
+        bytes calldata _options
+    ) external payable;
+}
+
+interface IFeeManager {
+    function getFeeBps(address _tokenA, address _tokenB) external view returns (uint256);
+    function collectFee(address _token, uint256 _amount) external;
+}
+
+interface ISwapRouter02 {
+    struct ExactInputSingleParams {
+        address tokenIn;
+        address tokenOut;
+        uint24 fee;
+        address recipient;
+        uint256 amountIn;
+        uint256 amountOutMinimum;
+        uint160 sqrtPriceLimitX96;
+    }
+    function exactInputSingle(ExactInputSingleParams calldata params) external payable returns (uint256 amountOut);
+}
+
 /**
  * @title SwapRouter
  * @author CrossChain Swap System
- * @notice Main entry point for cross-chain token swaps
+ * @notice Main entry point for cross-chain and same-chain token swaps
  */
 contract SwapRouter is Ownable, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
@@ -24,68 +57,92 @@ contract SwapRouter is Ownable, ReentrancyGuard, Pausable {
     /// @notice Address of the FeeManager contract
     address public feeManager;
 
+    /// @notice Address of the Uniswap V3 SwapRouter02 for same-chain swaps
+    address public uniswapRouter;
+
     /// @notice Maximum allowed slippage in basis points (100 = 1%)
     uint256 public maxSlippageBps = 100;
 
     /// @notice Maximum swap amount per transaction (prevents whale manipulation)
     uint256 public maxSwapAmount = 1_000_000 * 1e18;
 
+    /// @notice Counter for generating unique deposit IDs
+    uint256 public depositNonce;
+
     event SwapInitiated(
         address indexed sender,
         address indexed token,
         uint256 amount,
-        uint256 destChainId,
+        uint32 destEid,
         address recipient,
         uint256 amountAfterFee,
+        bytes32 depositId,
+        uint256 timestamp
+    );
+
+    event SwapExecuted(
+        address indexed sender,
+        address indexed tokenIn,
+        address tokenOut,
+        uint256 amountIn,
+        uint256 amountOut,
+        uint24 poolFee,
         uint256 timestamp
     );
 
     event BridgeAdapterUpdated(address indexed oldAdapter, address indexed newAdapter);
+    event UniswapRouterUpdated(address indexed oldRouter, address indexed newRouter);
     event TokenVaultUpdated(address indexed oldVault, address indexed newVault);
     event FeeManagerUpdated(address indexed oldManager, address indexed newManager);
     event MaxSlippageUpdated(uint256 oldSlippage, uint256 newSlippage);
+    event MaxSwapAmountUpdated(uint256 oldAmount, uint256 newAmount);
 
     error ZeroAmount();
     error ZeroAddress();
-    error InvalidChainId();
+    error InvalidDestEid();
     error SlippageExceeded(uint256 amountAfterFee, uint256 minAmountOut);
     error BridgeAdapterNotSet();
     error TokenVaultNotSet();
     error FeeManagerNotSet();
     error SlippageTooHigh();
     error SwapAmountTooLarge();
-
-    event MaxSwapAmountUpdated(uint256 oldAmount, uint256 newAmount);
+    error UniswapRouterNotSet();
 
     constructor() Ownable(msg.sender) {}
 
     /**
      * @notice Initiate a cross-chain token swap
-     * @param token The ERC20 token address to swap
+     * @param token The ERC20 token address to swap (source chain)
+     * @param toToken The destination token address (used for fee tier lookup)
      * @param amount The amount of tokens to swap
-     * @param destChainId The destination chain ID
+     * @param destEid The LayerZero V2 endpoint ID of the destination chain
      * @param recipient The address that receives tokens on the destination chain
      * @param minAmountOut The minimum acceptable output amount (slippage protection)
+     * @param options LayerZero messaging options (pass empty bytes for defaults)
      */
     function swapAndBridge(
         address token,
+        address toToken,
         uint256 amount,
-        uint256 destChainId,
+        uint32 destEid,
         address recipient,
-        uint256 minAmountOut
-    ) external nonReentrant whenNotPaused {
+        uint256 minAmountOut,
+        bytes calldata options
+    ) external payable nonReentrant whenNotPaused {
         if (amount == 0) revert ZeroAmount();
         if (amount > maxSwapAmount) revert SwapAmountTooLarge();
         if (token == address(0)) revert ZeroAddress();
+        if (toToken == address(0)) revert ZeroAddress();
         if (recipient == address(0)) revert ZeroAddress();
-        if (destChainId == 0 || destChainId == block.chainid) revert InvalidChainId();
+        if (destEid == 0) revert InvalidDestEid();
         if (bridgeAdapter == address(0)) revert BridgeAdapterNotSet();
         if (tokenVault == address(0)) revert TokenVaultNotSet();
         if (feeManager == address(0)) revert FeeManagerNotSet();
 
         IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
 
-        uint256 feeAmount = _calculateFee(amount);
+        uint256 feeBps = IFeeManager(feeManager).getFeeBps(token, toToken);
+        uint256 feeAmount = (amount * feeBps) / 10_000;
         uint256 amountAfterFee = amount - feeAmount;
 
         if (amountAfterFee < minAmountOut) {
@@ -94,28 +151,81 @@ contract SwapRouter is Ownable, ReentrancyGuard, Pausable {
 
         if (feeAmount > 0) {
             IERC20(token).safeTransfer(feeManager, feeAmount);
+            IFeeManager(feeManager).collectFee(token, feeAmount);
         }
 
-        IERC20(token).safeTransfer(tokenVault, amountAfterFee);
+        depositNonce++;
+        bytes32 depositId = keccak256(
+            abi.encodePacked(block.chainid, msg.sender, token, amountAfterFee, depositNonce)
+        );
+
+        IERC20(token).forceApprove(tokenVault, amountAfterFee);
+        ITokenVault(tokenVault).lockTokens(depositId, token, amountAfterFee, msg.sender);
+
+        IBridgeAdapter(bridgeAdapter).sendBridgeMessage{value: msg.value}(
+            destEid, token, amountAfterFee, recipient, depositId, options
+        );
 
         emit SwapInitiated(
             msg.sender,
             token,
             amount,
-            destChainId,
+            destEid,
             recipient,
             amountAfterFee,
+            depositId,
             block.timestamp
         );
     }
 
     /**
-     * @notice Calculate the swap fee
-     * @param amount The input amount
-     * @return The fee amount (30 basis points = 0.3%)
+     * @notice Execute a same-chain token swap via Uniswap V3
+     * @param tokenIn The input token address
+     * @param tokenOut The output token address
+     * @param amount The amount of input tokens
+     * @param minAmountOut The minimum acceptable output amount (slippage protection)
+     * @param poolFee The Uniswap V3 pool fee tier (500, 3000, or 10000)
      */
-    function _calculateFee(uint256 amount) internal pure returns (uint256) {
-        return (amount * 30) / 10_000;
+    function swapOnChain(
+        address tokenIn,
+        address tokenOut,
+        uint256 amount,
+        uint256 minAmountOut,
+        uint24 poolFee
+    ) external nonReentrant whenNotPaused {
+        if (amount == 0) revert ZeroAmount();
+        if (amount > maxSwapAmount) revert SwapAmountTooLarge();
+        if (tokenIn == address(0) || tokenOut == address(0)) revert ZeroAddress();
+        if (uniswapRouter == address(0)) revert UniswapRouterNotSet();
+
+        IERC20(tokenIn).safeTransferFrom(msg.sender, address(this), amount);
+
+        IERC20(tokenIn).forceApprove(uniswapRouter, amount);
+
+        uint256 amountOut = ISwapRouter02(uniswapRouter).exactInputSingle(
+            ISwapRouter02.ExactInputSingleParams({
+                tokenIn: tokenIn,
+                tokenOut: tokenOut,
+                fee: poolFee,
+                recipient: msg.sender,
+                amountIn: amount,
+                amountOutMinimum: minAmountOut,
+                sqrtPriceLimitX96: 0
+            })
+        );
+
+        emit SwapExecuted(msg.sender, tokenIn, tokenOut, amount, amountOut, poolFee, block.timestamp);
+    }
+
+    /**
+     * @notice Set the Uniswap V3 SwapRouter02 address for same-chain swaps
+     * @param _uniswapRouter Address of the Uniswap V3 SwapRouter02
+     */
+    function setUniswapRouter(address _uniswapRouter) external onlyOwner {
+        if (_uniswapRouter == address(0)) revert ZeroAddress();
+        address old = uniswapRouter;
+        uniswapRouter = _uniswapRouter;
+        emit UniswapRouterUpdated(old, _uniswapRouter);
     }
 
     /**

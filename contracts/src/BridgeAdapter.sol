@@ -1,182 +1,128 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
+import {OApp, Origin, MessagingFee, MessagingReceipt} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-interface ILayerZeroEndpoint {
-    function send(
-        uint16 _dstChainId,
-        bytes calldata _destination,
-        bytes calldata _payload,
-        address payable _refundAddress,
-        address _zroPaymentAddress,
-        bytes calldata _adapterParams
-    ) external payable;
-
-    function estimateFees(
-        uint16 _dstChainId,
-        address _userApplication,
-        bytes calldata _payload,
-        bool _payInZRO,
-        bytes calldata _adapterParams
-    ) external view returns (uint256 nativeFee, uint256 zroFee);
+interface ITokenVault {
+    function releaseTokens(bytes32 _depositId, address _recipient) external;
 }
 
 /**
  * @title BridgeAdapter
  * @author CrossChain Swap System
- * @notice Handles cross-chain messaging via LayerZero protocol
+ * @notice Handles cross-chain messaging via LayerZero V2 OApp standard
  */
-contract BridgeAdapter is Ownable, ReentrancyGuard {
-    /// @notice The LayerZero endpoint contract on this chain
-    ILayerZeroEndpoint public immutable lzEndpoint;
-
-    /// @notice Mapping of LayerZero chain ID to trusted remote contract address
-    mapping(uint16 => bytes) public trustedRemotes;
-
+contract BridgeAdapter is OApp, ReentrancyGuard {
     /// @notice Tracks processed nonces to prevent replay attacks
-    mapping(uint16 => mapping(uint64 => bool)) public processedNonces;
-
-    /// @notice Counter for outgoing message nonces
-    uint64 public outboundNonce;
+    mapping(uint32 => mapping(uint64 => bool)) public processedNonces;
 
     /// @notice Address of the SwapRouter contract
     address public swapRouter;
 
+    /// @notice Address of the TokenVault contract on this chain
+    address public tokenVault;
+
     event MessageSent(
-        uint16 indexed dstChainId,
-        address indexed sender,
+        uint32 indexed dstEid,
+        address indexed recipient,
         uint64 nonce,
         bytes payload
     );
 
     event MessageReceived(
-        uint16 indexed srcChainId,
+        uint32 indexed srcEid,
         address indexed recipient,
         address token,
         uint256 amount,
         uint64 nonce
     );
 
-    event TrustedRemoteSet(uint16 indexed chainId, bytes trustedRemote);
     event SwapRouterUpdated(address indexed oldRouter, address indexed newRouter);
+    event TokenVaultUpdated(address indexed oldVault, address indexed newVault);
 
     error ZeroAddress();
-    error InvalidSourceChain();
-    error UntrustedRemote();
     error NonceAlreadyProcessed();
-    error OnlyLzEndpoint();
     error OnlySwapRouter();
-    error InsufficientFee();
-    error TrustedRemoteNotSet();
+    error TokenVaultNotSet();
+
+    constructor(address _endpoint, address _delegate) OApp(_endpoint, _delegate) Ownable(_delegate) {}
 
     /**
-     * @notice Initialize the BridgeAdapter with a LayerZero endpoint
-     * @param _lzEndpoint Address of the LayerZero endpoint on this chain
+     * @notice Send a cross-chain message to release tokens on the destination chain
+     * @param _dstEid LayerZero V2 endpoint ID of the destination chain
+     * @param _token Token address being bridged
+     * @param _amount Amount of tokens to release on destination
+     * @param _recipient Address that receives tokens on the destination chain
+     * @param _depositId Unique deposit identifier for vault tracking
+     * @param _options LayerZero messaging options
      */
-    constructor(address _lzEndpoint) Ownable(msg.sender) {
-        if (_lzEndpoint == address(0)) revert ZeroAddress();
-        lzEndpoint = ILayerZeroEndpoint(_lzEndpoint);
-    }
-
-    /**
-     * @notice Send a cross-chain message to release tokens on destination chain
-     * @param _dstChainId LayerZero chain ID of the destination
-     * @param _token Token address to release on the destination chain
-     * @param _amount Amount of tokens to release
-     * @param _recipient Address that receives the tokens on the destination chain
-     */
-    function lzSend(
-        uint16 _dstChainId,
+    function sendBridgeMessage(
+        uint32 _dstEid,
         address _token,
         uint256 _amount,
-        address _recipient
-    ) external payable nonReentrant {
+        address _recipient,
+        bytes32 _depositId,
+        bytes calldata _options
+    ) external payable nonReentrant returns (MessagingReceipt memory receipt) {
         if (msg.sender != swapRouter) revert OnlySwapRouter();
-        if (trustedRemotes[_dstChainId].length == 0) revert TrustedRemoteNotSet();
 
-        outboundNonce++;
+        bytes memory payload = abi.encode(_token, _amount, _recipient, _depositId);
 
-        bytes memory payload = abi.encode(_token, _amount, _recipient, outboundNonce);
-
-        lzEndpoint.send{value: msg.value}(
-            _dstChainId,
-            trustedRemotes[_dstChainId],
+        receipt = _lzSend(
+            _dstEid,
             payload,
-            payable(msg.sender),
-            address(0),
-            bytes("")
+            _options,
+            MessagingFee(msg.value, 0),
+            payable(msg.sender)
         );
 
-        emit MessageSent(_dstChainId, _recipient, outboundNonce, payload);
+        emit MessageSent(_dstEid, _recipient, receipt.nonce, payload);
     }
 
     /**
-     * @notice Receive a cross-chain message from LayerZero
-     * @param _srcChainId The source chain that sent the message
-     * @param _srcAddress The contract address that sent the message
-     * @param _payload The encoded message data
+     * @notice Internal handler for incoming LayerZero messages
+     * @dev Called by OApp base after endpoint and peer validation
      */
-    function lzReceive(
-        uint16 _srcChainId,
-        bytes calldata _srcAddress,
-        uint64,
-        bytes calldata _payload
-    ) external nonReentrant {
-        if (msg.sender != address(lzEndpoint)) revert OnlyLzEndpoint();
+    function _lzReceive(
+        Origin calldata _origin,
+        bytes32,
+        bytes calldata _message,
+        address,
+        bytes calldata
+    ) internal override {
+        if (tokenVault == address(0)) revert TokenVaultNotSet();
+        if (processedNonces[_origin.srcEid][_origin.nonce]) revert NonceAlreadyProcessed();
+        processedNonces[_origin.srcEid][_origin.nonce] = true;
 
-        bytes memory trusted = trustedRemotes[_srcChainId];
-        if (trusted.length == 0) revert UntrustedRemote();
-        if (keccak256(_srcAddress) != keccak256(trusted)) revert UntrustedRemote();
+        (address token, uint256 amount, address recipient, bytes32 depositId) =
+            abi.decode(_message, (address, uint256, address, bytes32));
 
-        (
-            address token,
-            uint256 amount,
-            address recipient,
-            uint64 messageNonce
-        ) = abi.decode(_payload, (address, uint256, address, uint64));
+        ITokenVault(tokenVault).releaseTokens(depositId, recipient);
 
-        if (processedNonces[_srcChainId][messageNonce]) revert NonceAlreadyProcessed();
-        processedNonces[_srcChainId][messageNonce] = true;
-
-        emit MessageReceived(_srcChainId, recipient, token, amount, messageNonce);
+        emit MessageReceived(_origin.srcEid, recipient, token, amount, _origin.nonce);
     }
 
     /**
-     * @notice Estimate the LayerZero messaging fee
-     * @param _dstChainId LayerZero chain ID of the destination
-     * @param _token Token address for the message payload
-     * @param _amount Token amount for the message payload
-     * @param _recipient Recipient address for the message payload
-     * @return nativeFee The estimated fee in native token
-     * @return zroFee The estimated fee in ZRO token
+     * @notice Estimate the LayerZero messaging fee for a bridge operation
+     * @param _dstEid Destination endpoint ID
+     * @param _token Token address for payload encoding
+     * @param _amount Token amount for payload encoding
+     * @param _recipient Recipient address for payload encoding
+     * @param _depositId Deposit ID for payload encoding
+     * @param _options LayerZero messaging options
      */
-    function estimateFee(
-        uint16 _dstChainId,
+    function quoteBridgeFee(
+        uint32 _dstEid,
         address _token,
         uint256 _amount,
-        address _recipient
-    ) external view returns (uint256 nativeFee, uint256 zroFee) {
-        bytes memory payload = abi.encode(_token, _amount, _recipient, outboundNonce + 1);
-        return lzEndpoint.estimateFees(
-            _dstChainId,
-            address(this),
-            payload,
-            false,
-            bytes("")
-        );
-    }
-
-    /**
-     * @notice Set the trusted contract address on a remote chain
-     * @param _chainId LayerZero chain ID
-     * @param _trustedRemote Encoded address of the BridgeAdapter on that chain
-     */
-    function setTrustedRemote(uint16 _chainId, bytes calldata _trustedRemote) external onlyOwner {
-        if (_chainId == 0) revert InvalidSourceChain();
-        trustedRemotes[_chainId] = _trustedRemote;
-        emit TrustedRemoteSet(_chainId, _trustedRemote);
+        address _recipient,
+        bytes32 _depositId,
+        bytes calldata _options
+    ) external view returns (MessagingFee memory) {
+        bytes memory payload = abi.encode(_token, _amount, _recipient, _depositId);
+        return _quote(_dstEid, payload, _options, false);
     }
 
     /**
@@ -188,6 +134,17 @@ contract BridgeAdapter is Ownable, ReentrancyGuard {
         address old = swapRouter;
         swapRouter = _swapRouter;
         emit SwapRouterUpdated(old, _swapRouter);
+    }
+
+    /**
+     * @notice Set the TokenVault contract address on this chain
+     * @param _tokenVault Address of the deployed TokenVault
+     */
+    function setTokenVault(address _tokenVault) external onlyOwner {
+        if (_tokenVault == address(0)) revert ZeroAddress();
+        address old = tokenVault;
+        tokenVault = _tokenVault;
+        emit TokenVaultUpdated(old, _tokenVault);
     }
 
     receive() external payable {}

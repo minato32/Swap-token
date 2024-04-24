@@ -41,7 +41,7 @@ contract SwapTimelock is Ownable {
     error OperationNotReady();
     error OperationExpired();
     error OperationAlreadyExecuted();
-    error OperationCancelled_();
+    error OperationAlreadyCancelled();
     error ExecutionFailed();
     error ZeroAddress();
 
@@ -88,7 +88,7 @@ contract SwapTimelock is Ownable {
 
         if (op.scheduledAt == 0) revert OperationNotFound();
         if (op.executed) revert OperationAlreadyExecuted();
-        if (op.cancelled) revert OperationCancelled_();
+        if (op.cancelled) revert OperationAlreadyCancelled();
 
         if (block.timestamp < op.scheduledAt + MIN_DELAY) revert OperationNotReady();
         if (block.timestamp > op.scheduledAt + MIN_DELAY + GRACE_PERIOD) revert OperationExpired();

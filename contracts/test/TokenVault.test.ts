@@ -101,6 +101,87 @@ describe("TokenVault", function () {
     });
   });
 
+  describe("deposit cap", function () {
+    it("should enforce deposit cap per token", async function () {
+      const { tokenVault, token, swapRouterSigner, user, owner } = await loadFixture(deployFixture);
+      const tokenAddr = await token.getAddress();
+
+      await tokenVault.connect(owner).setMaxDepositCap(tokenAddr, ethers.parseEther("200"));
+
+      const depositId1 = ethers.keccak256(ethers.toUtf8Bytes("cap-test-1"));
+      await tokenVault.connect(swapRouterSigner).lockTokens(
+        depositId1, tokenAddr, ethers.parseEther("150"), user.address
+      );
+
+      const depositId2 = ethers.keccak256(ethers.toUtf8Bytes("cap-test-2"));
+      await expect(
+        tokenVault.connect(swapRouterSigner).lockTokens(
+          depositId2, tokenAddr, ethers.parseEther("100"), user.address
+        )
+      ).to.be.revertedWithCustomError(tokenVault, "DepositCapExceeded");
+    });
+
+    it("should allow unlimited deposits when cap is 0", async function () {
+      const { tokenVault, token, swapRouterSigner, user } = await loadFixture(deployFixture);
+      const tokenAddr = await token.getAddress();
+
+      const depositId = ethers.keccak256(ethers.toUtf8Bytes("no-cap-test"));
+      await expect(
+        tokenVault.connect(swapRouterSigner).lockTokens(
+          depositId, tokenAddr, ethers.parseEther("5000"), user.address
+        )
+      ).to.emit(tokenVault, "TokensLocked");
+    });
+
+    it("should track totalLocked correctly", async function () {
+      const { tokenVault, token, swapRouterSigner, user } = await loadFixture(deployFixture);
+      const tokenAddr = await token.getAddress();
+      const amount = ethers.parseEther("300");
+
+      const depositId = ethers.keccak256(ethers.toUtf8Bytes("track-test"));
+      await tokenVault.connect(swapRouterSigner).lockTokens(
+        depositId, tokenAddr, amount, user.address
+      );
+
+      expect(await tokenVault.totalLocked(tokenAddr)).to.equal(amount);
+    });
+  });
+
+  describe("input validation", function () {
+    it("should revert on zero token address", async function () {
+      const { tokenVault, swapRouterSigner, user, depositId } = await loadFixture(deployFixture);
+
+      await expect(
+        tokenVault.connect(swapRouterSigner).lockTokens(
+          depositId, ethers.ZeroAddress, ethers.parseEther("100"), user.address
+        )
+      ).to.be.revertedWithCustomError(tokenVault, "ZeroAddress");
+    });
+
+    it("should revert on zero amount", async function () {
+      const { tokenVault, token, swapRouterSigner, user, depositId } = await loadFixture(deployFixture);
+
+      await expect(
+        tokenVault.connect(swapRouterSigner).lockTokens(
+          depositId, await token.getAddress(), 0n, user.address
+        )
+      ).to.be.revertedWithCustomError(tokenVault, "ZeroAmount");
+    });
+
+    it("should revert release to zero address", async function () {
+      const { tokenVault, token, swapRouterSigner, bridgeAdapterSigner, user, depositId } =
+        await loadFixture(deployFixture);
+
+      await tokenVault.connect(swapRouterSigner).lockTokens(
+        depositId, await token.getAddress(), ethers.parseEther("100"), user.address
+      );
+
+      await expect(
+        tokenVault.connect(bridgeAdapterSigner).releaseTokens(depositId, ethers.ZeroAddress)
+      ).to.be.revertedWithCustomError(tokenVault, "ZeroAddress");
+    });
+  });
+
   describe("refund", function () {
     it("should refund after 30-minute timeout", async function () {
       const { tokenVault, token, swapRouterSigner, user, depositId } = await loadFixture(deployFixture);
