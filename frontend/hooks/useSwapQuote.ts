@@ -16,58 +16,85 @@ export function useSwapQuote({ fromToken, toToken, amount, fromChain, toChain }:
   const [quote, setQuote] = useState<SwapQuote | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const eventSourceRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-
-    if (!fromToken || !toToken || !amount || !fromChain || !toChain || parseFloat(amount) <= 0) {
-      setQuote(null);
-      setError(null);
-      return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
     }
 
-    if (fromChain === toChain) {
-      setError("Source and destination chains must be different");
+    const isValid = fromToken && toToken && amount && fromChain && toChain && parseFloat(amount) > 0;
+
+    if (!isValid) {
       setQuote(null);
+      setError(null);
+      setLoading(false);
       return;
     }
 
     setLoading(true);
     setError(null);
 
-    timerRef.current = setTimeout(async () => {
-      try {
-        const params = new URLSearchParams({
-          fromToken,
-          toToken,
-          amount,
-          fromChain,
-          toChain,
-        });
+    debounceRef.current = setTimeout(() => {
+      const params = new URLSearchParams({
+        fromToken,
+        toToken,
+        amount,
+        fromChain,
+        toChain,
+      });
 
-        const res = await fetch(`${API_BASE_URL}/quote?${params}`);
-        const data = await res.json();
+      const url = `${API_BASE_URL}/quote/stream?${params}`;
+      const es = new EventSource(url);
+      eventSourceRef.current = es;
 
-        if (!data.success) {
-          setError(data.error || "Failed to fetch quote");
-          setQuote(null);
-        } else {
-          setQuote(data.data);
+      es.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data) as SwapQuote;
+          setQuote(data);
           setError(null);
-        }
-      } catch {
-        setError("Unable to connect to quote service");
-        setQuote(null);
-      } finally {
-        setLoading(false);
-      }
+          setLoading(false);
+        } catch {}
+      };
+
+      es.onerror = () => {
+        es.close();
+        eventSourceRef.current = null;
+        fetchOnce(params);
+      };
     }, QUOTE_DEBOUNCE_MS);
 
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
     };
   }, [fromToken, toToken, amount, fromChain, toChain]);
+
+  async function fetchOnce(params: URLSearchParams) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/quote?${params}`);
+      const data = await res.json();
+
+      if (data.success) {
+        setQuote(data.data);
+        setError(null);
+      } else {
+        setError(data.error || "Failed to fetch quote");
+        setQuote(null);
+      }
+    } catch {
+      setError("Unable to connect to quote service");
+      setQuote(null);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return { quote, loading, error };
 }

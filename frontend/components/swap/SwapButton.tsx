@@ -1,13 +1,35 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAccount, useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
+import {
+  useAccount,
+  useSendTransaction,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+  useReadContract,
+} from "wagmi";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { parseUnits, maxUint256, erc20Abi, getAddress } from "viem";
+import { waitForTransactionReceipt } from "wagmi/actions";
+import { wagmiConfig } from "@/config/wagmi";
 import { API_BASE_URL } from "@/lib/constants";
 import type { Token } from "@/config/tokens";
 import type { Chain } from "@/lib/types";
 import { Spinner } from "@/components/ui";
 
-type SwapStep = "idle" | "approving" | "building" | "confirming" | "submitted" | "error";
+const WETH_ABI = [
+  {
+    name: "deposit",
+    type: "function",
+    stateMutability: "payable",
+    inputs: [],
+    outputs: [],
+  },
+] as const;
+
+const NATIVE_ADDRESS = "0x0000000000000000000000000000000000000000";
+
+type SwapStep = "idle" | "wrapping" | "approving" | "building" | "confirming" | "submitted" | "error";
 
 interface SwapButtonProps {
   fromToken: Token | null;
@@ -22,7 +44,8 @@ interface SwapButtonProps {
 
 const STEP_LABELS: Record<SwapStep, string> = {
   idle: "Swap",
-  approving: "Approving...",
+  wrapping: "Wrapping ETH → WETH...",
+  approving: "Approving Token...",
   building: "Building Transaction...",
   confirming: "Confirm in Wallet...",
   submitted: "Transaction Submitted",
@@ -40,17 +63,33 @@ export function SwapButton({
   onSuccess,
 }: SwapButtonProps) {
   const { address, isConnected } = useAccount();
+  const { openConnectModal } = useConnectModal();
   const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState<SwapStep>("idle");
   const [error, setError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>();
+  const [swapRouterAddress, setSwapRouterAddress] = useState<`0x${string}` | undefined>();
+  const [tokenInAddress, setTokenInAddress] = useState<`0x${string}` | undefined>();
 
   useEffect(() => setMounted(true), []);
 
   const { sendTransactionAsync } = useSendTransaction();
+  const { writeContractAsync } = useWriteContract();
   const { isLoading: isWaiting } = useWaitForTransactionReceipt({ hash: txHash });
 
-  const isLoading = step === "approving" || step === "building" || step === "confirming" || isWaiting;
+  const isNativeETH = fromToken?.address.toLowerCase() === NATIVE_ADDRESS;
+
+  const { data: allowance, refetch: refetchAllowance } = useReadContract({
+    address: tokenInAddress,
+    abi: erc20Abi,
+    functionName: "allowance",
+    args: address && swapRouterAddress ? [address, swapRouterAddress] : undefined,
+    query: {
+      enabled: !!tokenInAddress && !!address && !!swapRouterAddress,
+    },
+  });
+
+  const isLoading = step === "wrapping" || step === "approving" || step === "building" || step === "confirming" || isWaiting;
 
   async function handleSwap() {
     if (!fromToken || !toToken || !fromChain || !toChain || !address) return;
@@ -85,13 +124,52 @@ export function SwapButton({
         throw new Error(data.error || "Failed to build transaction");
       }
 
+      const txData = data.data;
+      const routerAddr = getAddress(txData.swapRouterAddress) as `0x${string}`;
+      const resolvedTokenIn = getAddress(txData.tokenIn) as `0x${string}`;
+      const parsedAmount = BigInt(txData.parsedAmount || parseUnits(amount, 18).toString());
+
+      setSwapRouterAddress(routerAddr);
+      setTokenInAddress(resolvedTokenIn);
+
+      let needsApproval = false;
+
+      if (txData.needsWethWrap) {
+        setStep("wrapping");
+        const wethAddr = getAddress(txData.wethAddress) as `0x${string}`;
+
+        const wrapHash = await writeContractAsync({
+          address: wethAddr,
+          abi: WETH_ABI,
+          functionName: "deposit",
+          value: parsedAmount,
+        });
+        await waitForTransactionReceipt(wagmiConfig, { hash: wrapHash });
+
+        needsApproval = true;
+      } else {
+        const { data: currentAllowance } = await refetchAllowance();
+        needsApproval = (currentAllowance ?? BigInt(0)) < parsedAmount;
+      }
+
+      if (needsApproval) {
+        setStep("approving");
+        const approveHash = await writeContractAsync({
+          address: resolvedTokenIn,
+          abi: erc20Abi,
+          functionName: "approve",
+          args: [routerAddr, maxUint256],
+        });
+        await waitForTransactionReceipt(wagmiConfig, { hash: approveHash });
+      }
+
       setStep("confirming");
 
       const hash = await sendTransactionAsync({
-        to: data.data.to as `0x${string}`,
-        data: data.data.data as `0x${string}`,
-        value: BigInt(data.data.value || "0"),
-        gas: BigInt(data.data.gasLimit),
+        to: txData.to as `0x${string}`,
+        data: txData.data as `0x${string}`,
+        value: BigInt(txData.value || "0"),
+        gas: BigInt(txData.gasLimit),
       });
 
       setTxHash(hash);
@@ -116,12 +194,12 @@ export function SwapButton({
     return STEP_LABELS[step];
   }
 
-  const isDisabled = !mounted || disabled || isLoading || !isConnected || !fromToken || !toToken || !fromChain || !toChain || !amount;
+  const isDisabled = !mounted || isLoading || (isConnected && (disabled || !fromToken || !toToken || !fromChain || !toChain || !amount));
 
   return (
     <div className="mt-4">
       <button
-        onClick={handleSwap}
+        onClick={!isConnected ? openConnectModal : handleSwap}
         disabled={isDisabled}
         className={`w-full py-3.5 rounded-xl font-heading font-semibold text-sm transition-all
           ${isDisabled

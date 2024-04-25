@@ -3,8 +3,15 @@ export interface SwapQuote {
   priceImpact: string;
   estimatedGas: string;
   bridgeFee: string;
+  protocolFee: string;
   totalFee: string;
+  feeTier: number;
+  feeTierLabel: string;
   estimatedTime: string;
+  exchangeRate: string;
+  swapType: "same-chain" | "cross-chain";
+  inputAmountUsd: string | null;
+  outputAmountUsd: string | null;
 }
 
 export interface SwapRequest {
