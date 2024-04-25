@@ -44,14 +44,11 @@ router.post("/", validateSwap, async (req: Request, res: Response, next: NextFun
       throw new AppError(400, errors.array()[0].msg);
     }
 
-    const { fromToken, amount, fromChain, toChain, recipient, minAmountOut } = req.body;
-
-    if (fromChain === toChain) {
-      throw new AppError(400, "Source and destination chains must be different");
-    }
+    const { fromToken, toToken, amount, fromChain, toChain, recipient, minAmountOut } = req.body;
 
     const transaction = await buildSwapTransaction(
       fromToken,
+      toToken,
       amount,
       fromChain,
       toChain,

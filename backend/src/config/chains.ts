@@ -12,6 +12,9 @@ export interface ChainConfig {
   tokenVaultAddress: string;
   feeManagerAddress: string;
   lzChainId: number;
+  wethAddress: string;
+  quoterV2Address: string;
+  nativeSymbol: string;
 }
 
 const CHAINS: Record<string, ChainConfig> = {
@@ -23,7 +26,10 @@ const CHAINS: Record<string, ChainConfig> = {
     bridgeAdapterAddress: process.env.BRIDGE_ADAPTER_ADDRESS || "",
     tokenVaultAddress: process.env.TOKEN_VAULT_ADDRESS || "",
     feeManagerAddress: process.env.FEE_MANAGER_ADDRESS || "",
-    lzChainId: 10161,
+    lzChainId: 40161,
+    wethAddress: "0xfFf9976782d46CC05630D07AE6142005F2dd0291",
+    quoterV2Address: "0xEd1f6473345F45b75F8179591dd5bA1888cf2FB3",
+    nativeSymbol: "ETH",
   },
   amoy: {
     name: "Polygon Amoy",
@@ -33,7 +39,10 @@ const CHAINS: Record<string, ChainConfig> = {
     bridgeAdapterAddress: process.env.BRIDGE_ADAPTER_AMOY_ADDRESS || "",
     tokenVaultAddress: process.env.TOKEN_VAULT_AMOY_ADDRESS || "",
     feeManagerAddress: process.env.FEE_MANAGER_AMOY_ADDRESS || "",
-    lzChainId: 10267,
+    lzChainId: 40267,
+    wethAddress: "",
+    quoterV2Address: "",
+    nativeSymbol: "MATIC",
   },
   bsc: {
     name: "BSC Testnet",
@@ -43,7 +52,10 @@ const CHAINS: Record<string, ChainConfig> = {
     bridgeAdapterAddress: process.env.BRIDGE_ADAPTER_BSC_ADDRESS || "",
     tokenVaultAddress: process.env.TOKEN_VAULT_BSC_ADDRESS || "",
     feeManagerAddress: process.env.FEE_MANAGER_BSC_ADDRESS || "",
-    lzChainId: 10102,
+    lzChainId: 40102,
+    wethAddress: "",
+    quoterV2Address: "",
+    nativeSymbol: "BNB",
   },
 };
 

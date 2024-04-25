@@ -3,6 +3,7 @@ import { query, validationResult } from "express-validator";
 import { getQuote } from "../services/priceService";
 import { getSupportedChains } from "../config/chains";
 import { AppError } from "../middleware/errorHandler";
+import { onPriceUpdate } from "../services/binanceWsService";
 
 const router = Router();
 
@@ -39,10 +40,6 @@ router.get("/", validateQuote, async (req: Request, res: Response, next: NextFun
 
     const { fromToken, toToken, amount, fromChain, toChain } = req.query as Record<string, string>;
 
-    if (fromChain === toChain) {
-      throw new AppError(400, "Source and destination chains must be different");
-    }
-
     const quote = await getQuote(fromToken, toToken, amount, fromChain, toChain);
 
     res.json({
@@ -52,6 +49,47 @@ router.get("/", validateQuote, async (req: Request, res: Response, next: NextFun
   } catch (err) {
     next(err);
   }
+});
+
+router.get("/stream", validateQuote, (req: Request, res: Response) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ success: false, error: errors.array()[0].msg });
+    return;
+  }
+
+  const { fromToken, toToken, amount, fromChain, toChain } = req.query as Record<string, string>;
+
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
+    "Access-Control-Allow-Origin": "*",
+  });
+
+  let lastSent = 0;
+  const THROTTLE_MS = 1_000;
+
+  async function sendQuote() {
+    const now = Date.now();
+    if (now - lastSent < THROTTLE_MS) return;
+    lastSent = now;
+
+    try {
+      const quote = await getQuote(fromToken, toToken, amount, fromChain, toChain);
+      res.write(`data: ${JSON.stringify(quote)}\n\n`);
+    } catch {}
+  }
+
+  sendQuote();
+
+  const unsubscribe = onPriceUpdate(() => {
+    sendQuote();
+  });
+
+  req.on("close", () => {
+    unsubscribe();
+  });
 });
 
 export default router;
