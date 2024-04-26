@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
+import { createPortal } from "react-dom";
 import { SUPPORTED_CHAINS } from "@/lib/constants";
 import type { Chain } from "@/lib/types";
 
@@ -11,93 +12,99 @@ interface ChainSelectorProps {
   label: string;
 }
 
+const CHAIN_ICONS: Record<string, string> = {
+  Sepolia: "/chains/Sepolia eth.png",
+  Amoy: "/chains/Amoy-polygon.webp",
+  "BSC Testnet": "/chains/BSC-BNB.png",
+};
+
 const CHAIN_COLORS: Record<string, string> = {
-  Sepolia: "bg-blue-500",
-  Amoy: "bg-purple-500",
-  "BSC Testnet": "bg-yellow-500",
+  Sepolia: "#3b82f6",
+  Amoy: "#8b5cf6",
+  "BSC Testnet": "#f59e0b",
 };
 
 export function ChainSelector({ selectedChain, onSelect, excludeChainId, label }: ChainSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
   const chains = SUPPORTED_CHAINS.filter((c) => c.id !== excludeChainId);
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   return (
-    <div ref={dropdownRef} className="relative">
-      <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">
-        {label}
-      </label>
-
+    <>
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2.5 rounded-xl w-full
-          bg-[var(--color-surface)] border border-[var(--color-border)]
-          hover:border-primary-400 transition-colors text-left"
+        onClick={() => setIsOpen(true)}
+        className="flex items-center gap-2 px-3 py-2.5 rounded-full w-full
+          bg-[var(--color-surface-low)] border border-[var(--color-border)]
+          hover:border-[#d0bcff]/30 transition-colors text-left"
       >
         {selectedChain ? (
           <>
-            <ChainIcon name={selectedChain.name} />
-            <span className="font-heading font-semibold text-sm text-[var(--color-text-primary)]">
+            <img
+              src={CHAIN_ICONS[selectedChain.name]}
+              alt={selectedChain.name}
+              className="w-6 h-6 rounded-full shrink-0 object-cover"
+            />
+            <span className="font-heading font-semibold text-sm text-[var(--color-text-primary)] truncate">
               {selectedChain.name}
             </span>
           </>
         ) : (
           <span className="text-sm text-[var(--color-text-secondary)]">Select chain</span>
         )}
-        <svg className="ml-auto w-4 h-4 text-[var(--color-text-secondary)]" viewBox="0 0 20 20" fill="currentColor">
+        <svg className="ml-auto w-4 h-4 text-[var(--color-text-secondary)] shrink-0" viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
         </svg>
       </button>
 
-      {isOpen && (
-        <div className="absolute z-50 mt-2 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl p-2">
-          {chains.map((chain) => (
-            <button
-              key={chain.id}
-              onClick={() => {
-                onSelect(chain);
-                setIsOpen(false);
-              }}
-              className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left
-                hover:bg-primary-500/10 transition-colors
-                ${selectedChain?.id === chain.id ? "bg-primary-500/10" : ""}`}
-            >
-              <ChainIcon name={chain.name} />
-              <div>
-                <p className="font-heading font-semibold text-sm text-[var(--color-text-primary)]">
-                  {chain.name}
-                </p>
-                <p className="text-xs text-[var(--color-text-secondary)]">{chain.symbol}</p>
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
+      {/* Modal Overlay via Portal */}
+      {isOpen && typeof window !== "undefined" ? createPortal(
+        <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 200 }}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
 
-function ChainIcon({ name }: { name: string }) {
-  const initials: Record<string, string> = {
-    Sepolia: "E",
-    Amoy: "P",
-    "BSC Testnet": "B",
-  };
+          <div className="relative w-full max-w-[400px] bg-[var(--color-surface-low)] border border-[var(--color-border)] rounded-3xl overflow-hidden shadow-2xl">
+            {/* Header */}
+            <div className="flex items-center justify-between p-5 pb-4">
+              <h3 className="font-heading font-bold text-lg text-[var(--color-text-primary)]">Select a chain</h3>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="w-8 h-8 rounded-full bg-[var(--color-surface)] flex items-center justify-center hover:bg-[var(--color-border)] transition-colors"
+              >
+                <svg className="w-4 h-4 text-[var(--color-text-secondary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
 
-  return (
-    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold ${CHAIN_COLORS[name] || "bg-gray-500"}`}>
-      {initials[name] || "?"}
-    </div>
+            {/* Chain List */}
+            <div className="px-3 pb-4 space-y-1">
+              {chains.map((chain) => (
+                <button
+                  key={chain.id}
+                  onClick={() => { onSelect(chain); setIsOpen(false); }}
+                  className={`flex items-center gap-4 w-full px-4 py-3.5 rounded-2xl text-left transition-all
+                    hover:bg-white/5
+                    ${selectedChain?.id === chain.id ? "bg-[#d0bcff]/10 border border-[#d0bcff]/20" : "border border-transparent"}`}
+                >
+                  <img
+                    src={CHAIN_ICONS[chain.name]}
+                    alt={chain.name}
+                    className="w-10 h-10 rounded-full shrink-0 object-cover"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-heading font-semibold text-[var(--color-text-primary)]">{chain.name}</p>
+                    <p className="text-xs text-[var(--color-text-secondary)]">Chain ID: {chain.id}</p>
+                  </div>
+                  {selectedChain?.id === chain.id && (
+                    <svg className="w-5 h-5 text-[#d0bcff] shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>,
+        document.body
+      ) : null}
+    </>
   );
 }

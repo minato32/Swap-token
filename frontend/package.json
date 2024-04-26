@@ -14,6 +14,7 @@
     "@tailwindcss/postcss": "^4.2.2",
     "@tanstack/react-query": "^5.90.21",
     "autoprefixer": "^10.4.27",
+    "framer-motion": "^12.38.0",
     "next": "^14.2.35",
     "postcss": "^8.4.31",
     "react": "^18.3.1",

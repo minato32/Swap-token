@@ -1,17 +1,23 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Inter } from "next/font/google";
-import "./globals.css";
+import { Plus_Jakarta_Sans, Manrope, Space_Grotesk } from "next/font/google";
 import { Providers } from "./providers";
+import "./globals.css";
 
-const spaceGrotesk = Space_Grotesk({
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-heading",
   display: "swap",
 });
 
-const inter = Inter({
+const manrope = Manrope({
   subsets: ["latin"],
   variable: "--font-body",
+  display: "swap",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-label",
   display: "swap",
 });
 
@@ -26,8 +32,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${spaceGrotesk.variable} ${inter.variable}`}>
-      <body className="min-h-screen font-body transition-theme bg-[var(--color-bg)] text-[var(--color-text-primary)]">
+    <html lang="en" suppressHydrationWarning className={`${plusJakartaSans.variable} ${manrope.variable} ${spaceGrotesk.variable}`}>
+      <body className="min-h-screen font-body transition-weighted bg-[var(--color-bg)] text-[var(--color-text-primary)]">
         <Providers>{children}</Providers>
       </body>
     </html>
