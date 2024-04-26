@@ -27,7 +27,7 @@ const CHAINS: Record<string, ChainConfig> = {
     tokenVaultAddress: process.env.TOKEN_VAULT_ADDRESS || "",
     feeManagerAddress: process.env.FEE_MANAGER_ADDRESS || "",
     lzChainId: 40161,
-    wethAddress: "0xfFf9976782d46CC05630D07AE6142005F2dd0291",
+    wethAddress: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
     quoterV2Address: "0xEd1f6473345F45b75F8179591dd5bA1888cf2FB3",
     nativeSymbol: "ETH",
   },

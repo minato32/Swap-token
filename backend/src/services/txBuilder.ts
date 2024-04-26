@@ -31,7 +31,8 @@ function buildSameChainSwapTransaction(
   toToken: string,
   amount: string,
   chain: string,
-  minAmountOut: string
+  minAmountOut: string,
+  poolFee: number = 500
 ): SwapTransaction {
   const chainConfig = getChainConfig(chain);
   if (!chainConfig) throw new Error("Unsupported chain");
@@ -50,7 +51,7 @@ function buildSameChainSwapTransaction(
     "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": 6,
     "0xb2ddc47b08971fab819e0af9ea171223b7408ed6": 18,
     "0x41e94eb019c0762f9bfcf9fb1e58725bfb0e7582": 6,
-    "0xfff9976782d46cc05630d07ae6142005f2dd0291": 18,
+    "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": 18,
   };
 
   const fromDecimals = TOKEN_DECIMALS[fromToken.toLowerCase()] ?? 18;
@@ -59,14 +60,12 @@ function buildSameChainSwapTransaction(
   const iface = new ethers.Interface(SWAP_ON_CHAIN_ABI);
   const parsedAmount = ethers.parseUnits(amount, fromDecimals);
   const parsedMinOut = ethers.parseUnits(minAmountOut, toDecimals);
-  const defaultPoolFee = 3000;
-
   const data = iface.encodeFunctionData("swapOnChain", [
     resolvedFromToken,
     resolvedToToken,
     parsedAmount,
     parsedMinOut,
-    defaultPoolFee,
+    poolFee,
   ]);
 
   const needsWethWrap = fromToken.toLowerCase() === NATIVE_ADDRESS;
@@ -94,10 +93,11 @@ export async function buildSwapTransaction(
   fromChain: string,
   toChain: string,
   recipient: string,
-  minAmountOut: string
+  minAmountOut: string,
+  poolFee: number = 500
 ): Promise<SwapTransaction> {
   if (fromChain === toChain) {
-    return buildSameChainSwapTransaction(fromToken, toToken, amount, fromChain, minAmountOut);
+    return buildSameChainSwapTransaction(fromToken, toToken, amount, fromChain, minAmountOut, poolFee);
   }
 
   const sourceChain = getChainConfig(fromChain);

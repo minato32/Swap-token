@@ -6,6 +6,7 @@ const QUOTER_V2_ABI = [
 ];
 
 const NATIVE_ADDRESS = "0x0000000000000000000000000000000000000000";
+const FEE_TIERS = [500, 3000, 10000, 100];
 
 const providerCache: Record<string, ethers.JsonRpcProvider> = {};
 
@@ -29,14 +30,14 @@ function resolveWeth(tokenAddress: string, wethAddress: string): string {
 export interface QuoterResult {
   amountOut: bigint;
   gasEstimate: bigint;
+  feeTier: number;
 }
 
 export async function quoteExactInputSingle(
   tokenIn: string,
   tokenOut: string,
   amountIn: bigint,
-  chain: string,
-  feeTier: number = 3000
+  chain: string
 ): Promise<QuoterResult | null> {
   const config = getChainConfig(chain);
   if (!config?.quoterV2Address || !config.wethAddress) return null;
@@ -49,35 +50,43 @@ export async function quoteExactInputSingle(
 
   if (resolvedIn.toLowerCase() === resolvedOut.toLowerCase()) return null;
 
-  try {
-    const quoter = new ethers.Contract(config.quoterV2Address, QUOTER_V2_ABI, provider);
+  const quoterAddress = ethers.getAddress(config.quoterV2Address.toLowerCase());
+  const quoter = new ethers.Contract(quoterAddress, QUOTER_V2_ABI, provider);
 
-    const params = {
-      tokenIn: resolvedIn,
-      tokenOut: resolvedOut,
-      amountIn,
-      fee: feeTier,
-      sqrtPriceLimitX96: 0n,
-    };
+  console.log(`[QuoterV2] Trying ${resolvedIn}→${resolvedOut} amount=${amountIn} on ${chain}`);
 
-    const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("QuoterV2 timeout")), 3000)
-    );
+  for (const fee of FEE_TIERS) {
+    try {
+      const params = {
+        tokenIn: resolvedIn,
+        tokenOut: resolvedOut,
+        amountIn,
+        fee,
+        sqrtPriceLimitX96: BigInt(0),
+      };
 
-    const result = await Promise.race([
-      quoter.quoteExactInputSingle.staticCall(params),
-      timeoutPromise,
-    ]);
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("QuoterV2 timeout")), 3000)
+      );
 
-    return {
-      amountOut: result.amountOut,
-      gasEstimate: result.gasEstimate,
-    };
-  } catch (error) {
-    console.warn(
-      `QuoterV2 failed for ${tokenIn}→${tokenOut} on ${chain}:`,
-      (error as Error).message?.slice(0, 100)
-    );
-    return null;
+      const result = await Promise.race([
+        quoter.quoteExactInputSingle.staticCall(params),
+        timeoutPromise,
+      ]);
+
+      console.log(`[QuoterV2] Success: ${tokenIn}→${tokenOut} fee=${fee} amountOut=${result.amountOut}`);
+
+      return {
+        amountOut: result.amountOut,
+        gasEstimate: result.gasEstimate,
+        feeTier: fee,
+      };
+    } catch (err) {
+      console.log(`[QuoterV2] fee=${fee} failed: ${(err as Error).message?.slice(0, 120)}`);
+      continue;
+    }
   }
+
+  console.warn(`[QuoterV2] All fee tiers failed for ${tokenIn}→${tokenOut} on ${chain}`);
+  return null;
 }

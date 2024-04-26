@@ -44,7 +44,7 @@ router.post("/", validateSwap, async (req: Request, res: Response, next: NextFun
       throw new AppError(400, errors.array()[0].msg);
     }
 
-    const { fromToken, toToken, amount, fromChain, toChain, recipient, minAmountOut } = req.body;
+    const { fromToken, toToken, amount, fromChain, toChain, recipient, minAmountOut, poolFee } = req.body;
 
     const transaction = await buildSwapTransaction(
       fromToken,
@@ -53,7 +53,8 @@ router.post("/", validateSwap, async (req: Request, res: Response, next: NextFun
       fromChain,
       toChain,
       recipient,
-      minAmountOut
+      minAmountOut,
+      poolFee ? Number(poolFee) : 500
     );
 
     res.json({

@@ -55,7 +55,7 @@ const TOKEN_DECIMALS: Record<string, number> = {
   "0xb2ddc47b08971fab819e0af9ea171223b7408ed6": 18,
   "0x41e94eb019c0762f9bfcf9fb1e58725bfb0e7582": 6,
   "0x64544969ed7ebf5f083679233325356ebe738930": 18,
-  "0xfff9976782d46cc05630d07ae6142005f2dd0291": 18,
+  "0xfff9976782d46cc05630d1f6ebab18b2324d6b14": 18,
 };
 
 interface QuoteResult {
@@ -72,6 +72,7 @@ interface QuoteResult {
   swapType: "same-chain" | "cross-chain";
   inputAmountUsd: string | null;
   outputAmountUsd: string | null;
+  uniswapFeeTier: number;
 }
 
 function getTokenDecimals(tokenAddress: string): number {
@@ -114,14 +115,17 @@ export async function getQuote(
 
   const bridgeFee = isSameChain ? BigInt(0) : ethers.parseUnits("0.001", 18);
 
-  const chainConfig = getChainConfig(fromChain);
-  const nativeSymbol = chainConfig?.nativeSymbol || "ETH";
-  const fromSymbol = resolveSymbol(fromToken, nativeSymbol);
-  const toSymbol = resolveSymbol(toToken, nativeSymbol);
+  const fromChainConfig = getChainConfig(fromChain);
+  const toChainConfig = getChainConfig(toChain);
+  const fromNativeSymbol = fromChainConfig?.nativeSymbol || "ETH";
+  const toNativeSymbol = toChainConfig?.nativeSymbol || "ETH";
+  const fromSymbol = resolveSymbol(fromToken, fromNativeSymbol);
+  const toSymbol = resolveSymbol(toToken, toNativeSymbol);
 
   let outputAmount: bigint;
   let exchangeRate: number;
   let priceSource: string;
+  let uniswapFeeTier = 0;
 
   if (isSameChain) {
     const quoterResult = await quoteExactInputSingle(
@@ -133,6 +137,7 @@ export async function getQuote(
 
     if (quoterResult) {
       outputAmount = quoterResult.amountOut;
+      uniswapFeeTier = quoterResult.feeTier;
       const fromFloat = parseFloat(ethers.formatUnits(amountAfterFee, fromDecimals));
       const toFloat = parseFloat(ethers.formatUnits(outputAmount, toDecimals));
       exchangeRate = fromFloat > 0 ? toFloat / fromFloat : 0;
@@ -183,6 +188,7 @@ export async function getQuote(
     swapType: isSameChain ? "same-chain" : "cross-chain",
     inputAmountUsd,
     outputAmountUsd,
+    uniswapFeeTier,
   };
 }
 
