@@ -9,7 +9,7 @@ import {
   useReadContract,
 } from "wagmi";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
-import { parseUnits, maxUint256, erc20Abi, getAddress } from "viem";
+import { parseUnits, parseGwei, maxUint256, erc20Abi, getAddress } from "viem";
 import { waitForTransactionReceipt } from "wagmi/actions";
 import { wagmiConfig } from "@/config/wagmi";
 import { API_BASE_URL } from "@/lib/constants";
@@ -144,6 +144,8 @@ export function SwapButton({
           abi: WETH_ABI,
           functionName: "deposit",
           value: parsedAmount,
+          maxFeePerGas: parseGwei("50"),
+          maxPriorityFeePerGas: parseGwei("30"),
         });
         await waitForTransactionReceipt(wagmiConfig, { hash: wrapHash });
 
@@ -160,6 +162,8 @@ export function SwapButton({
           abi: erc20Abi,
           functionName: "approve",
           args: [routerAddr, maxUint256],
+          maxFeePerGas: parseGwei("50"),
+          maxPriorityFeePerGas: parseGwei("30"),
         });
         await waitForTransactionReceipt(wagmiConfig, { hash: approveHash });
       }
@@ -171,6 +175,8 @@ export function SwapButton({
         data: txData.data as `0x${string}`,
         value: BigInt(txData.value || "0"),
         gas: BigInt(txData.gasLimit),
+        maxFeePerGas: parseGwei("50"),
+        maxPriorityFeePerGas: parseGwei("30"),
       });
 
       setTxHash(hash);
