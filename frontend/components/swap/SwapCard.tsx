@@ -216,6 +216,7 @@ export function SwapCard({ onSwapSuccess }: SwapCardProps) {
           toChain={toChain}
           amount={amount}
           minAmountOut={quote?.outputAmount || "0"}
+          poolFee={quote?.uniswapFeeTier || 500}
           disabled={!quote || quoteLoading || !!quoteError}
           onSuccess={handleSuccess}
         />

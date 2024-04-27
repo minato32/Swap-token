@@ -1,212 +1,361 @@
-<svg width="1400" height="1050" viewBox="0 0 1400 1050" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="1400" height="1050" fill="#0A0A0B"/>
+<svg width="1400" height="1800" viewBox="0 0 1400 1800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1400" height="1800" fill="#0A0A0B"/>
 
   <defs>
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="15" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-    </filter>
-
     <marker id="arrPurple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#8B5CF6" />
+      <polygon points="0 0, 10 3.5, 0 7" fill="#8B5CF6"/>
     </marker>
     <marker id="arrPink" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#EC4899" />
+      <polygon points="0 0, 10 3.5, 0 7" fill="#EC4899"/>
     </marker>
     <marker id="arrBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6" />
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6"/>
     </marker>
     <marker id="arrGreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#22C55E" />
+      <polygon points="0 0, 10 3.5, 0 7" fill="#22C55E"/>
+    </marker>
+    <marker id="arrCyan" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#06B6D4"/>
     </marker>
     <marker id="arrAmber" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#F59E0B" />
+      <polygon points="0 0, 10 3.5, 0 7" fill="#F59E0B"/>
     </marker>
   </defs>
 
-  <!-- ==================== LAYER 1: USER (BROWSER) ==================== -->
-  <g transform="translate(475, 40)">
-    <rect width="450" height="130" rx="14" fill="#1A1A1D" fill-opacity="0.6" stroke="#8B5CF6" stroke-opacity="0.4"/>
-    <text x="20" y="28" font-family="Inter, sans-serif" fill="#8B5CF6" font-size="11" font-weight="600" letter-spacing="0.05em">USER (BROWSER)</text>
+  <!-- ==================== TITLE ==================== -->
+  <text x="700" y="38" text-anchor="middle" font-family="Inter, sans-serif" fill="white" font-size="22" font-weight="700">CrossChain Swap System — Architecture</text>
+  <text x="700" y="58" text-anchor="middle" font-family="Inter, sans-serif" fill="#6B7280" font-size="12">Same-chain DEX swaps via Uniswap V3 · Cross-chain bridges via LayerZero · Real-time pricing via Binance WS</text>
+
+  <!-- ==================== LAYER 1: USER ==================== -->
+  <g transform="translate(350, 85)">
+    <rect width="700" height="120" rx="14" fill="#1A1A1D" fill-opacity="0.6" stroke="#8B5CF6" stroke-opacity="0.4"/>
+    <text x="20" y="26" font-family="Inter, sans-serif" fill="#8B5CF6" font-size="11" font-weight="600" letter-spacing="0.05em">LAYER 1 — USER (BROWSER)</text>
 
     <g transform="translate(20, 45)">
-      <rect width="195" height="65" rx="8" fill="#FFFFFF" fill-opacity="0.04" stroke="#FFFFFF" stroke-opacity="0.08"/>
-      <text x="15" y="22" font-family="Inter, sans-serif" fill="#6B7280" font-size="10" font-weight="600">EXTENSION</text>
-      <text x="15" y="45" font-family="Inter, sans-serif" fill="white" font-size="14" font-weight="500">MetaMask Wallet</text>
+      <rect width="200" height="55" rx="8" fill="#FFFFFF" fill-opacity="0.04" stroke="#FFFFFF" stroke-opacity="0.08"/>
+      <text x="15" y="22" font-family="Inter, sans-serif" fill="#6B7280" font-size="10" font-weight="600">WALLET</text>
+      <text x="15" y="42" font-family="Inter, sans-serif" fill="white" font-size="13" font-weight="500">MetaMask · RainbowKit</text>
     </g>
 
-    <g transform="translate(235, 45)">
-      <rect width="195" height="65" rx="8" fill="#FFFFFF" fill-opacity="0.04" stroke="#FFFFFF" stroke-opacity="0.08"/>
-      <text x="15" y="22" font-family="Inter, sans-serif" fill="#6B7280" font-size="10" font-weight="600">WEBAPP</text>
-      <text x="15" y="42" font-family="Inter, sans-serif" fill="white" font-size="14" font-weight="500">Next.js 14, wagmi</text>
-      <text x="15" y="57" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="11">RainbowKit</text>
+    <g transform="translate(240, 45)">
+      <rect width="210" height="55" rx="8" fill="#FFFFFF" fill-opacity="0.04" stroke="#FFFFFF" stroke-opacity="0.08"/>
+      <text x="15" y="22" font-family="Inter, sans-serif" fill="#6B7280" font-size="10" font-weight="600">FRONTEND</text>
+      <text x="15" y="42" font-family="Inter, sans-serif" fill="white" font-size="13" font-weight="500">Next.js 14 · wagmi v2</text>
+    </g>
+
+    <g transform="translate(470, 45)">
+      <rect width="210" height="55" rx="8" fill="#FFFFFF" fill-opacity="0.04" stroke="#FFFFFF" stroke-opacity="0.08"/>
+      <text x="15" y="22" font-family="Inter, sans-serif" fill="#6B7280" font-size="10" font-weight="600">TX FLOW (3 Steps)</text>
+      <text x="15" y="42" font-family="Inter, sans-serif" fill="white" font-size="12" font-weight="500">Wrap WETH → Approve → Swap</text>
     </g>
   </g>
+
+  <!-- ==================== ARROWS: User → Backend + Contracts ==================== -->
+  <line x1="550" y1="205" x2="350" y2="270" stroke="#8B5CF6" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrPurple)"/>
+  <text x="410" y="232" font-family="Inter, sans-serif" fill="#8B5CF6" font-size="10">SSE + REST</text>
+
+  <line x1="850" y1="205" x2="850" y2="270" stroke="#8B5CF6" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrPurple)"/>
+  <text x="860" y="245" font-family="Inter, sans-serif" fill="#8B5CF6" font-size="10">signs txs</text>
 
   <!-- ==================== LAYER 2: BACKEND API ==================== -->
   <g transform="translate(80, 270)">
-    <rect width="300" height="210" rx="14" fill="#1A1A1D" fill-opacity="0.6" stroke="#3B82F6" stroke-opacity="0.4"/>
-    <text x="20" y="28" font-family="Inter, sans-serif" fill="#3B82F6" font-size="11" font-weight="600" letter-spacing="0.05em">BACKEND API (EXPRESS + TS)</text>
+    <rect width="530" height="260" rx="14" fill="#1A1A1D" fill-opacity="0.6" stroke="#3B82F6" stroke-opacity="0.4"/>
+    <text x="20" y="26" font-family="Inter, sans-serif" fill="#3B82F6" font-size="11" font-weight="600" letter-spacing="0.05em">LAYER 2 — BACKEND API (Express + TypeScript)</text>
+
+    <text x="20" y="55" font-family="Inter, sans-serif" fill="#6B7280" font-size="10" font-weight="600">ENDPOINTS</text>
+    <g transform="translate(20, 65)">
+      <rect width="240" height="26" rx="6" fill="#3B82F6" fill-opacity="0.08"/>
+      <text x="10" y="18" font-family="monospace" fill="white" font-size="11"><tspan fill="#3B82F6" font-weight="bold">GET</tspan>  /quote</text>
+    </g>
+    <g transform="translate(20, 97)">
+      <rect width="240" height="26" rx="6" fill="#06B6D4" fill-opacity="0.08"/>
+      <text x="10" y="18" font-family="monospace" fill="white" font-size="11"><tspan fill="#06B6D4" font-weight="bold">SSE</tspan>  /quote/stream</text>
+    </g>
+    <g transform="translate(20, 129)">
+      <rect width="240" height="26" rx="6" fill="#3B82F6" fill-opacity="0.08"/>
+      <text x="10" y="18" font-family="monospace" fill="white" font-size="11"><tspan fill="#3B82F6" font-weight="bold">POST</tspan> /swap</text>
+    </g>
+    <g transform="translate(20, 161)">
+      <rect width="240" height="26" rx="6" fill="#3B82F6" fill-opacity="0.08"/>
+      <text x="10" y="18" font-family="monospace" fill="white" font-size="11"><tspan fill="#3B82F6" font-weight="bold">GET</tspan>  /status/:txHash</text>
+    </g>
+
+    <text x="290" y="55" font-family="Inter, sans-serif" fill="#6B7280" font-size="10" font-weight="600">SERVICES</text>
+    <g transform="translate(290, 65)">
+      <rect width="220" height="26" rx="6" fill="#FFFFFF" fill-opacity="0.04"/>
+      <text x="10" y="18" font-family="Inter, sans-serif" fill="white" font-size="11">priceService.ts</text>
+    </g>
+    <g transform="translate(290, 97)">
+      <rect width="220" height="26" rx="6" fill="#FFFFFF" fill-opacity="0.04"/>
+      <text x="10" y="18" font-family="Inter, sans-serif" fill="white" font-size="11">txBuilder.ts</text>
+    </g>
+    <g transform="translate(290, 129)">
+      <rect width="220" height="26" rx="6" fill="#FFFFFF" fill-opacity="0.04"/>
+      <text x="10" y="18" font-family="Inter, sans-serif" fill="white" font-size="11">statusService.ts</text>
+    </g>
+
+    <text x="20" y="215" font-family="Inter, sans-serif" fill="#6B7280" font-size="10" font-weight="600">PRICE FALLBACK CHAIN</text>
+    <g transform="translate(20, 225)">
+      <rect width="145" height="24" rx="12" fill="#06B6D4" fill-opacity="0.15" stroke="#06B6D4" stroke-opacity="0.3"/>
+      <text x="72" y="16" text-anchor="middle" font-family="Inter, sans-serif" fill="#06B6D4" font-size="10" font-weight="600">Binance WS ~1s</text>
+    </g>
+    <text x="175" y="243" font-family="Inter, sans-serif" fill="#6B7280" font-size="14">→</text>
+    <g transform="translate(190, 225)">
+      <rect width="145" height="24" rx="12" fill="#06B6D4" fill-opacity="0.10" stroke="#06B6D4" stroke-opacity="0.2"/>
+      <text x="72" y="16" text-anchor="middle" font-family="Inter, sans-serif" fill="#06B6D4" font-size="10">CoinGecko 60s</text>
+    </g>
+    <text x="345" y="243" font-family="Inter, sans-serif" fill="#6B7280" font-size="14">→</text>
+    <g transform="translate(360, 225)">
+      <rect width="145" height="24" rx="12" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.1"/>
+      <text x="72" y="16" text-anchor="middle" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">QuoterV2 on-chain</text>
+    </g>
+  </g>
+
+  <!-- ==================== EXTERNAL SERVICES ==================== -->
+  <g transform="translate(800, 270)">
+    <rect width="520" height="260" rx="14" fill="#1A1A1D" fill-opacity="0.6" stroke="#06B6D4" stroke-opacity="0.3"/>
+    <text x="20" y="26" font-family="Inter, sans-serif" fill="#06B6D4" font-size="11" font-weight="600" letter-spacing="0.05em">EXTERNAL SERVICES</text>
 
     <g transform="translate(20, 48)">
-      <rect width="260" height="28" rx="6" fill="#3B82F6" fill-opacity="0.08"/>
-      <text x="10" y="19" font-family="monospace" fill="white" font-size="12"><tspan fill="#3B82F6" font-weight="bold">GET</tspan>  /quote</text>
+      <rect width="230" height="45" rx="8" fill="#06B6D4" fill-opacity="0.08" stroke="#06B6D4" stroke-opacity="0.15"/>
+      <text x="15" y="20" font-family="Inter, sans-serif" fill="#06B6D4" font-size="12" font-weight="600">Binance WebSocket</text>
+      <text x="15" y="36" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">Live ETH, BNB, MATIC ticks</text>
     </g>
-    <g transform="translate(20, 83)">
-      <rect width="260" height="28" rx="6" fill="#3B82F6" fill-opacity="0.08"/>
-      <text x="10" y="19" font-family="monospace" fill="white" font-size="12"><tspan fill="#3B82F6" font-weight="bold">POST</tspan> /swap</text>
+    <g transform="translate(270, 48)">
+      <rect width="230" height="45" rx="8" fill="#06B6D4" fill-opacity="0.06" stroke="#06B6D4" stroke-opacity="0.12"/>
+      <text x="15" y="20" font-family="Inter, sans-serif" fill="#06B6D4" font-size="12" font-weight="500">CoinGecko API</text>
+      <text x="15" y="36" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">USD prices · Free tier</text>
     </g>
-    <g transform="translate(20, 118)">
-      <rect width="260" height="28" rx="6" fill="#3B82F6" fill-opacity="0.08"/>
-      <text x="10" y="19" font-family="monospace" fill="white" font-size="12"><tspan fill="#3B82F6" font-weight="bold">GET</tspan>  /status/:txHash</text>
+    <g transform="translate(20, 108)">
+      <rect width="230" height="45" rx="8" fill="#06B6D4" fill-opacity="0.06" stroke="#06B6D4" stroke-opacity="0.12"/>
+      <text x="15" y="20" font-family="Inter, sans-serif" fill="#06B6D4" font-size="12" font-weight="500">Uniswap V3 QuoterV2</text>
+      <text x="15" y="36" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">On-chain swap simulation</text>
     </g>
-    <g transform="translate(20, 153)">
-      <rect width="260" height="28" rx="6" fill="#3B82F6" fill-opacity="0.08"/>
-      <text x="10" y="19" font-family="monospace" fill="white" font-size="12"><tspan fill="#3B82F6" font-weight="bold">GET</tspan>  /health</text>
-    </g>
-  </g>
-
-  <!-- ==================== LAYER 2: SOURCE CHAIN ==================== -->
-  <g transform="translate(500, 240)">
-    <rect width="420" height="310" rx="14" fill="#1A1A1D" fill-opacity="0.6" stroke="#EC4899" stroke-opacity="0.4"/>
-    <text x="20" y="28" font-family="Inter, sans-serif" fill="#EC4899" font-size="11" font-weight="600" letter-spacing="0.05em">SOURCE CHAIN (SEPOLIA / AMOY / BSC)</text>
-
-    <!-- SwapRouter as hub -->
-    <g transform="translate(20, 50)">
-      <rect width="380" height="48" rx="8" fill="#EC4899" fill-opacity="0.12" stroke="#EC4899" stroke-opacity="0.3"/>
-      <text x="190" y="30" text-anchor="middle" font-family="Inter, sans-serif" fill="white" font-size="15" font-weight="600">SwapRouter</text>
-      <text x="190" y="30" text-anchor="middle" font-family="Inter, sans-serif" fill="white" font-size="15" font-weight="600">SwapRouter</text>
+    <g transform="translate(270, 108)">
+      <rect width="230" height="45" rx="8" fill="#06B6D4" fill-opacity="0.06" stroke="#06B6D4" stroke-opacity="0.12"/>
+      <text x="15" y="20" font-family="Inter, sans-serif" fill="#06B6D4" font-size="12" font-weight="500">LayerZero Scan API</text>
+      <text x="15" y="36" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">Cross-chain tx status</text>
     </g>
 
-    <!-- Three branches from SwapRouter -->
-    <!-- FeeManager -->
-    <g transform="translate(20, 120)">
-      <rect width="115" height="42" rx="6" fill="#EC4899" fill-opacity="0.08" stroke="#EC4899" stroke-opacity="0.15"/>
-      <text x="57" y="27" text-anchor="middle" font-family="Inter, sans-serif" fill="white" font-size="12" font-weight="500">FeeManager</text>
+    <!-- Supported Chains -->
+    <text x="20" y="185" font-family="Inter, sans-serif" fill="#6B7280" font-size="10" font-weight="600">SUPPORTED CHAINS</text>
+    <g transform="translate(20, 198)">
+      <rect width="150" height="30" rx="8" fill="#3B82F6" fill-opacity="0.08" stroke="#3B82F6" stroke-opacity="0.15"/>
+      <circle cx="18" cy="15" r="6" fill="#3B82F6" fill-opacity="0.5"/>
+      <text x="32" y="20" font-family="Inter, sans-serif" fill="white" font-size="11">Sepolia (11155111)</text>
     </g>
-    <!-- TokenVault -->
-    <g transform="translate(152, 120)">
-      <rect width="115" height="42" rx="6" fill="#EC4899" fill-opacity="0.08" stroke="#EC4899" stroke-opacity="0.15"/>
-      <text x="57" y="27" text-anchor="middle" font-family="Inter, sans-serif" fill="white" font-size="12" font-weight="500">TokenVault</text>
+    <g transform="translate(185, 198)">
+      <rect width="150" height="30" rx="8" fill="#8B5CF6" fill-opacity="0.08" stroke="#8B5CF6" stroke-opacity="0.15"/>
+      <circle cx="18" cy="15" r="6" fill="#8B5CF6" fill-opacity="0.5"/>
+      <text x="32" y="20" font-family="Inter, sans-serif" fill="white" font-size="11">Amoy (80002)</text>
     </g>
-    <!-- BridgeAdapter -->
-    <g transform="translate(285, 120)">
-      <rect width="115" height="42" rx="6" fill="#EC4899" fill-opacity="0.08" stroke="#EC4899" stroke-opacity="0.15"/>
-      <text x="57" y="27" text-anchor="middle" font-family="Inter, sans-serif" fill="white" font-size="12" font-weight="500">BridgeAdapter</text>
-    </g>
-
-    <!-- Fan-out arrows from SwapRouter to three contracts -->
-    <line x1="97" y1="98" x2="77" y2="120" stroke="#EC4899" stroke-opacity="0.5" stroke-width="1.5"/>
-    <line x1="210" y1="98" x2="210" y2="120" stroke="#EC4899" stroke-opacity="0.5" stroke-width="1.5"/>
-    <line x1="323" y1="98" x2="343" y2="120" stroke="#EC4899" stroke-opacity="0.5" stroke-width="1.5"/>
-
-    <!-- Labels under arrows -->
-    <text x="60" y="110" font-family="Inter, sans-serif" fill="#EC4899" font-size="9" text-anchor="middle">0.3% fee</text>
-    <text x="210" y="110" font-family="Inter, sans-serif" fill="#EC4899" font-size="9" text-anchor="middle">lock tokens</text>
-    <text x="360" y="110" font-family="Inter, sans-serif" fill="#EC4899" font-size="9" text-anchor="middle">bridge msg</text>
-
-    <!-- Divider -->
-    <line x1="20" y1="185" x2="400" y2="185" stroke="#FFFFFF" stroke-opacity="0.05" stroke-width="1"/>
-    <text x="210" y="205" text-anchor="middle" font-family="Inter, sans-serif" fill="#6B7280" font-size="10" font-weight="600" letter-spacing="0.05em">SECURITY LAYER</text>
-
-    <!-- Security contracts -->
-    <g transform="translate(20, 220)">
-      <rect width="115" height="38" rx="6" fill="#F59E0B" fill-opacity="0.08" stroke="#F59E0B" stroke-opacity="0.15"/>
-      <text x="57" y="24" text-anchor="middle" font-family="Inter, sans-serif" fill="#FBBF24" font-size="11" font-weight="500">PriceOracle</text>
-    </g>
-    <g transform="translate(152, 220)">
-      <rect width="115" height="38" rx="6" fill="#F59E0B" fill-opacity="0.08" stroke="#F59E0B" stroke-opacity="0.15"/>
-      <text x="57" y="24" text-anchor="middle" font-family="Inter, sans-serif" fill="#FBBF24" font-size="11" font-weight="500">SwapTimelock</text>
-    </g>
-    <g transform="translate(285, 220)">
-      <rect width="115" height="38" rx="6" fill="#F59E0B" fill-opacity="0.08" stroke="#F59E0B" stroke-opacity="0.15"/>
-      <text x="57" y="24" text-anchor="middle" font-family="Inter, sans-serif" fill="#FBBF24" font-size="11" font-weight="500">SecurityMonitor</text>
+    <g transform="translate(350, 198)">
+      <rect width="150" height="30" rx="8" fill="#F59E0B" fill-opacity="0.08" stroke="#F59E0B" stroke-opacity="0.15"/>
+      <circle cx="18" cy="15" r="6" fill="#F59E0B" fill-opacity="0.5"/>
+      <text x="32" y="20" font-family="Inter, sans-serif" fill="white" font-size="11">BSC Testnet (97)</text>
     </g>
   </g>
 
-  <!-- ==================== SECURITY BADGES (Right side) ==================== -->
-  <g transform="translate(1020, 270)">
-    <rect width="300" height="280" rx="14" fill="#1A1A1D" fill-opacity="0.6" stroke="#F59E0B" stroke-opacity="0.3"/>
-    <text x="20" y="28" font-family="Inter, sans-serif" fill="#F59E0B" font-size="11" font-weight="600" letter-spacing="0.05em">SECURITY FEATURES</text>
+  <!-- ==================== ARROW: Backend → SwapRouter ==================== -->
+  <line x1="345" y1="530" x2="500" y2="590" stroke="#3B82F6" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrBlue)"/>
+  <text x="380" y="570" font-family="Inter, sans-serif" fill="#3B82F6" font-size="10">builds unsigned tx</text>
 
-    <text x="20" y="58" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="11">&#x2022; ReentrancyGuard</text>
-    <text x="20" y="78" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="11">&#x2022; SafeERC20 transfers</text>
-    <text x="20" y="98" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="11">&#x2022; 1% slippage guard</text>
-    <text x="20" y="118" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="11">&#x2022; Emergency pause</text>
-    <text x="20" y="138" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="11">&#x2022; Max swap amount cap</text>
-    <text x="20" y="158" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="11">&#x2022; Deposit cap per token</text>
-    <text x="20" y="178" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="11">&#x2022; Nonce replay protection</text>
-    <text x="20" y="198" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="11">&#x2022; Trusted remote validation</text>
-    <text x="20" y="218" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="11">&#x2022; 24-hour admin timelock</text>
-    <text x="20" y="238" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="11">&#x2022; On-chain activity monitoring</text>
-    <text x="20" y="258" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="11">&#x2022; Chainlink oracle ready</text>
+  <!-- ==================== SWAPROUTER (Entry Point) ==================== -->
+  <g transform="translate(400, 580)">
+    <rect width="600" height="55" rx="12" fill="#EC4899" fill-opacity="0.15" stroke="#EC4899" stroke-opacity="0.5" stroke-width="2"/>
+    <text x="300" y="24" text-anchor="middle" font-family="Inter, sans-serif" fill="white" font-size="17" font-weight="700">SwapRouter</text>
+    <text x="300" y="44" text-anchor="middle" font-family="Inter, sans-serif" fill="#EC4899" font-size="11">Entry point — auto-detects same-chain vs cross-chain</text>
   </g>
 
-  <!-- ==================== LAYER 3: LAYERZERO ==================== -->
-  <g transform="translate(700, 650)">
-    <circle cx="0" cy="0" r="45" fill="#0A0A0B" stroke="#8B5CF6" stroke-opacity="0.3" stroke-width="2"/>
-    <circle cx="0" cy="0" r="32" fill="#1A1A1D" stroke="#8B5CF6" stroke-width="2" stroke-opacity="0.6"/>
-    <text x="0" y="6" text-anchor="middle" fill="white" font-size="18" font-weight="bold" font-family="Inter, sans-serif">LZ</text>
-    <text x="0" y="68" text-anchor="middle" font-family="Inter, sans-serif" fill="white" font-size="14" font-weight="600">LayerZero Protocol</text>
-    <text x="0" y="84" text-anchor="middle" font-family="Inter, sans-serif" fill="#6B7280" font-size="11">Cross-chain messaging</text>
+  <!-- ==================== ARROWS: SwapRouter → Two Paths ==================== -->
+  <line x1="550" y1="635" x2="350" y2="710" stroke="#8B5CF6" stroke-width="2" marker-end="url(#arrPurple)"/>
+  <text x="400" y="680" font-family="Inter, sans-serif" fill="#8B5CF6" font-size="11" font-weight="600">fromChain === toChain</text>
+
+  <line x1="850" y1="635" x2="1050" y2="710" stroke="#EC4899" stroke-width="2" marker-end="url(#arrPink)"/>
+  <text x="910" y="680" font-family="Inter, sans-serif" fill="#EC4899" font-size="11" font-weight="600">fromChain !== toChain</text>
+
+  <!-- ==================== LEFT PATH: SAME-CHAIN ==================== -->
+  <g transform="translate(60, 710)">
+    <rect width="560" height="280" rx="14" fill="#1A1A1D" fill-opacity="0.6" stroke="#8B5CF6" stroke-opacity="0.3"/>
+    <text x="20" y="28" font-family="Inter, sans-serif" fill="#8B5CF6" font-size="12" font-weight="700" letter-spacing="0.03em">SAME-CHAIN SWAP</text>
+    <text x="540" y="28" text-anchor="end" font-family="Inter, sans-serif" fill="#22C55E" font-size="11" font-weight="600">0% Protocol Fee</text>
+
+    <text x="20" y="55" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="11">swapOnChain(tokenIn, tokenOut, amount, minOut, poolFee)</text>
+
+    <!-- Steps -->
+    <g transform="translate(20, 75)">
+      <rect width="155" height="55" rx="8" fill="#8B5CF6" fill-opacity="0.08" stroke="#8B5CF6" stroke-opacity="0.15"/>
+      <text x="78" y="22" text-anchor="middle" font-family="Inter, sans-serif" fill="#8B5CF6" font-size="10" font-weight="600">STEP 1</text>
+      <text x="78" y="42" text-anchor="middle" font-family="Inter, sans-serif" fill="white" font-size="12">Pull WETH from user</text>
+    </g>
+
+    <text x="188" y="108" font-family="Inter, sans-serif" fill="#6B7280" font-size="18">→</text>
+
+    <g transform="translate(200, 75)">
+      <rect width="155" height="55" rx="8" fill="#8B5CF6" fill-opacity="0.08" stroke="#8B5CF6" stroke-opacity="0.15"/>
+      <text x="78" y="22" text-anchor="middle" font-family="Inter, sans-serif" fill="#8B5CF6" font-size="10" font-weight="600">STEP 2</text>
+      <text x="78" y="42" text-anchor="middle" font-family="Inter, sans-serif" fill="white" font-size="12">Uniswap V3 Swap</text>
+    </g>
+
+    <text x="368" y="108" font-family="Inter, sans-serif" fill="#6B7280" font-size="18">→</text>
+
+    <g transform="translate(380, 75)">
+      <rect width="155" height="55" rx="8" fill="#22C55E" fill-opacity="0.08" stroke="#22C55E" stroke-opacity="0.15"/>
+      <text x="78" y="22" text-anchor="middle" font-family="Inter, sans-serif" fill="#22C55E" font-size="10" font-weight="600">STEP 3</text>
+      <text x="78" y="42" text-anchor="middle" font-family="Inter, sans-serif" fill="white" font-size="12">Tokens → User</text>
+    </g>
+
+    <!-- Details -->
+    <line x1="20" y1="150" x2="540" y2="150" stroke="#FFFFFF" stroke-opacity="0.05"/>
+    <text x="20" y="175" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; No protocol fee — user only pays Uniswap pool fee (0.05-1%)</text>
+    <text x="20" y="195" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; exactInputSingle() via Uniswap V3 SwapRouter02</text>
+    <text x="20" y="215" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; Auto-selects best fee tier via QuoterV2</text>
+    <text x="20" y="235" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; Native ETH auto-wrapped to WETH before swap</text>
+    <text x="20" y="255" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; Completion: ~30 seconds</text>
   </g>
 
-  <!-- ==================== LAYER 4: DESTINATION CHAIN ==================== -->
-  <g transform="translate(370, 790)">
-    <rect width="340" height="150" rx="14" fill="#1A1A1D" fill-opacity="0.6" stroke="#22C55E" stroke-opacity="0.4"/>
-    <text x="20" y="28" font-family="Inter, sans-serif" fill="#22C55E" font-size="11" font-weight="600" letter-spacing="0.05em">DESTINATION CHAIN</text>
+  <!-- ==================== RIGHT PATH: CROSS-CHAIN ==================== -->
+  <g transform="translate(780, 710)">
+    <rect width="560" height="280" rx="14" fill="#1A1A1D" fill-opacity="0.6" stroke="#EC4899" stroke-opacity="0.3"/>
+    <text x="20" y="28" font-family="Inter, sans-serif" fill="#EC4899" font-size="12" font-weight="700" letter-spacing="0.03em">CROSS-CHAIN BRIDGE</text>
+    <text x="540" y="28" text-anchor="end" font-family="Inter, sans-serif" fill="#F59E0B" font-size="11" font-weight="600">0.05–0.30% Tiered Fee</text>
+
+    <text x="20" y="55" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="11">swapAndBridge(token, amount, destEid, recipient, minOut, options)</text>
+
+    <!-- Steps -->
+    <g transform="translate(10, 75)">
+      <rect width="125" height="55" rx="8" fill="#EC4899" fill-opacity="0.08" stroke="#EC4899" stroke-opacity="0.15"/>
+      <text x="62" y="22" text-anchor="middle" font-family="Inter, sans-serif" fill="#EC4899" font-size="10" font-weight="600">FeeManager</text>
+      <text x="62" y="42" text-anchor="middle" font-family="Inter, sans-serif" fill="white" font-size="11">Collect fee</text>
+    </g>
+
+    <text x="145" y="108" font-family="Inter, sans-serif" fill="#6B7280" font-size="16">→</text>
+
+    <g transform="translate(155, 75)">
+      <rect width="125" height="55" rx="8" fill="#EC4899" fill-opacity="0.08" stroke="#EC4899" stroke-opacity="0.15"/>
+      <text x="62" y="22" text-anchor="middle" font-family="Inter, sans-serif" fill="#EC4899" font-size="10" font-weight="600">TokenVault</text>
+      <text x="62" y="42" text-anchor="middle" font-family="Inter, sans-serif" fill="white" font-size="11">Lock tokens</text>
+    </g>
+
+    <text x="290" y="108" font-family="Inter, sans-serif" fill="#6B7280" font-size="16">→</text>
+
+    <g transform="translate(300, 75)">
+      <rect width="125" height="55" rx="8" fill="#EC4899" fill-opacity="0.08" stroke="#EC4899" stroke-opacity="0.15"/>
+      <text x="62" y="22" text-anchor="middle" font-family="Inter, sans-serif" fill="#EC4899" font-size="10" font-weight="600">BridgeAdapter</text>
+      <text x="62" y="42" text-anchor="middle" font-family="Inter, sans-serif" fill="white" font-size="11">LZ send</text>
+    </g>
+
+    <text x="435" y="108" font-family="Inter, sans-serif" fill="#6B7280" font-size="16">→</text>
+
+    <g transform="translate(445, 75)">
+      <rect width="100" height="55" rx="8" fill="#F59E0B" fill-opacity="0.08" stroke="#F59E0B" stroke-opacity="0.15"/>
+      <text x="50" y="22" text-anchor="middle" font-family="Inter, sans-serif" fill="#F59E0B" font-size="10" font-weight="600">Treasury</text>
+      <text x="50" y="42" text-anchor="middle" font-family="Inter, sans-serif" fill="white" font-size="11">Fee → owner</text>
+    </g>
+
+    <!-- Details -->
+    <line x1="20" y1="150" x2="540" y2="150" stroke="#FFFFFF" stroke-opacity="0.05"/>
+    <text x="20" y="175" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; Tiered fee: 0.05% (stable) / 0.15% (standard) / 0.30% (exotic)</text>
+    <text x="20" y="195" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; Tokens locked with 30-min refund timeout</text>
+    <text x="20" y="215" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; LayerZero V2 OApp with nonce replay protection</text>
+    <text x="20" y="235" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; Bridge fee: ~0.001-0.01 ETH (paid to LZ relayers)</text>
+    <text x="20" y="255" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; Completion: 2-5 minutes</text>
+  </g>
+
+  <!-- ==================== SECURITY LAYER ==================== -->
+  <g transform="translate(60, 1040)">
+    <rect width="560" height="80" rx="14" fill="#1A1A1D" fill-opacity="0.6" stroke="#F59E0B" stroke-opacity="0.3"/>
+    <text x="20" y="28" font-family="Inter, sans-serif" fill="#F59E0B" font-size="11" font-weight="600" letter-spacing="0.05em">SECURITY LAYER</text>
+    <g transform="translate(20, 42)">
+      <rect width="150" height="28" rx="6" fill="#F59E0B" fill-opacity="0.08" stroke="#F59E0B" stroke-opacity="0.12"/>
+      <text x="75" y="19" text-anchor="middle" font-family="Inter, sans-serif" fill="#FBBF24" font-size="11">PriceOracle</text>
+    </g>
+    <g transform="translate(190, 42)">
+      <rect width="160" height="28" rx="6" fill="#F59E0B" fill-opacity="0.08" stroke="#F59E0B" stroke-opacity="0.12"/>
+      <text x="80" y="19" text-anchor="middle" font-family="Inter, sans-serif" fill="#FBBF24" font-size="11">SwapTimelock (24h)</text>
+    </g>
+    <g transform="translate(370, 42)">
+      <rect width="170" height="28" rx="6" fill="#F59E0B" fill-opacity="0.08" stroke="#F59E0B" stroke-opacity="0.12"/>
+      <text x="85" y="19" text-anchor="middle" font-family="Inter, sans-serif" fill="#FBBF24" font-size="11">SecurityMonitor</text>
+    </g>
+  </g>
+
+  <!-- ==================== ARROW: Cross-chain → LayerZero ==================== -->
+  <line x1="1060" y1="990" x2="1060" y2="1080" stroke="#EC4899" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrPink)"/>
+  <text x="1070" y="1040" font-family="Inter, sans-serif" fill="#EC4899" font-size="10">lzSend()</text>
+
+  <!-- ==================== LAYERZERO PROTOCOL ==================== -->
+  <g transform="translate(780, 1090)">
+    <rect width="560" height="80" rx="14" fill="#1A1A1D" fill-opacity="0.6" stroke="#8B5CF6" stroke-opacity="0.3"/>
+    <circle cx="50" cy="40" r="28" fill="#1A1A1D" stroke="#8B5CF6" stroke-width="2" stroke-opacity="0.6"/>
+    <text x="50" y="46" text-anchor="middle" fill="white" font-size="16" font-weight="bold" font-family="Inter, sans-serif">LZ</text>
+
+    <text x="100" y="32" font-family="Inter, sans-serif" fill="white" font-size="14" font-weight="600">LayerZero V2 Protocol</text>
+    <text x="100" y="52" font-family="Inter, sans-serif" fill="#6B7280" font-size="11">Cross-chain message delivery · Validator + Executor network · 2-5 min</text>
+  </g>
+
+  <!-- ==================== ARROW: LayerZero → Destination ==================== -->
+  <line x1="1060" y1="1170" x2="1060" y2="1240" stroke="#22C55E" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrGreen)"/>
+  <text x="1070" y="1210" font-family="Inter, sans-serif" fill="#22C55E" font-size="10">delivers msg</text>
+
+  <!-- ==================== DESTINATION CHAIN ==================== -->
+  <g transform="translate(780, 1250)">
+    <rect width="560" height="120" rx="14" fill="#1A1A1D" fill-opacity="0.6" stroke="#22C55E" stroke-opacity="0.4"/>
+    <text x="20" y="28" font-family="Inter, sans-serif" fill="#22C55E" font-size="11" font-weight="600" letter-spacing="0.05em">DESTINATION CHAIN (Amoy / BSC Testnet)</text>
 
     <g transform="translate(20, 48)">
-      <rect width="300" height="38" rx="6" fill="#22C55E" fill-opacity="0.08" stroke="#22C55E" stroke-opacity="0.15"/>
-      <text x="150" y="24" text-anchor="middle" font-family="Inter, sans-serif" fill="white" font-size="13" font-weight="500">BridgeAdapter (receive + verify)</text>
+      <rect width="240" height="40" rx="8" fill="#22C55E" fill-opacity="0.08" stroke="#22C55E" stroke-opacity="0.15"/>
+      <text x="120" y="26" text-anchor="middle" font-family="Inter, sans-serif" fill="white" font-size="12" font-weight="500">BridgeAdapter.lzReceive()</text>
     </g>
-    <text x="170" y="96" text-anchor="middle" font-family="Inter, sans-serif" fill="#22C55E" font-size="10">&#x2193;</text>
-    <g transform="translate(20, 100)">
-      <rect width="300" height="38" rx="6" fill="#22C55E" fill-opacity="0.08" stroke="#22C55E" stroke-opacity="0.15"/>
-      <text x="150" y="24" text-anchor="middle" font-family="Inter, sans-serif" fill="white" font-size="13" font-weight="500">TokenVault (release to recipient)</text>
+
+    <text x="275" y="74" font-family="Inter, sans-serif" fill="#22C55E" font-size="16">→</text>
+
+    <g transform="translate(295, 48)">
+      <rect width="240" height="40" rx="8" fill="#22C55E" fill-opacity="0.08" stroke="#22C55E" stroke-opacity="0.15"/>
+      <text x="120" y="26" text-anchor="middle" font-family="Inter, sans-serif" fill="white" font-size="12" font-weight="500">TokenVault.releaseTokens()</text>
     </g>
+
+    <text x="280" y="108" text-anchor="middle" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">Validates peer · Checks nonce · Transfers tokens to recipient wallet</text>
   </g>
 
-  <!-- ==================== 30-MIN REFUND BOX ==================== -->
-  <g transform="translate(790, 830)">
-    <rect width="220" height="70" rx="10" fill="#1A1A1D" fill-opacity="0.6" stroke="#EF4444" stroke-opacity="0.3"/>
-    <text x="110" y="25" text-anchor="middle" font-family="Inter, sans-serif" fill="#EF4444" font-size="11" font-weight="600">IF BRIDGE FAILS</text>
-    <text x="110" y="45" text-anchor="middle" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="11">30-min timeout &#x2192; User calls</text>
-    <text x="110" y="60" text-anchor="middle" font-family="Inter, sans-serif" fill="white" font-size="12" font-weight="500">refund() &#x2192; Tokens returned</text>
+  <!-- ==================== REFUND BOX ==================== -->
+  <g transform="translate(60, 1250)">
+    <rect width="560" height="120" rx="14" fill="#1A1A1D" fill-opacity="0.6" stroke="#EF4444" stroke-opacity="0.3"/>
+    <text x="20" y="28" font-family="Inter, sans-serif" fill="#EF4444" font-size="11" font-weight="600" letter-spacing="0.05em">FAILURE RECOVERY</text>
+
+    <text x="20" y="58" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="11">If LayerZero message fails to deliver:</text>
+    <text x="20" y="80" font-family="Inter, sans-serif" fill="white" font-size="12">1. 30-minute timeout expires on source TokenVault</text>
+    <text x="20" y="100" font-family="Inter, sans-serif" fill="white" font-size="12">2. Original sender calls refund(depositId)</text>
+    <text x="20" y="120" font-family="Inter, sans-serif" fill="#22C55E" font-size="12" font-weight="500">3. Locked tokens returned to user wallet ✓</text>
   </g>
 
-  <!-- ==================== FLOW ARROWS ==================== -->
+  <!-- ==================== SECURITY FEATURES ==================== -->
+  <g transform="translate(60, 1420)">
+    <rect width="1280" height="130" rx="14" fill="#1A1A1D" fill-opacity="0.4" stroke="#F59E0B" stroke-opacity="0.2"/>
+    <text x="640" y="28" text-anchor="middle" font-family="Inter, sans-serif" fill="#F59E0B" font-size="11" font-weight="600" letter-spacing="0.05em">SECURITY FEATURES</text>
 
-  <!-- User → Backend (fetches quotes) -->
-  <path d="M 475 130 C 350 130, 230 200, 230 270" stroke="#8B5CF6" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrPurple)" fill="none"/>
-  <rect x="280" y="190" width="100" height="18" rx="9" fill="#0A0A0B"/>
-  <text x="330" y="203" text-anchor="middle" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">fetches quotes</text>
+    <text x="30" y="55" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; ReentrancyGuard on all state-changing functions</text>
+    <text x="30" y="75" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; SafeERC20 for all token transfers</text>
+    <text x="30" y="95" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; Emergency pause (Pausable)</text>
+    <text x="30" y="115" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; Max swap amount cap</text>
 
-  <!-- User → Source Chain (signs transactions) -->
-  <path d="M 925 130 C 925 180, 800 200, 750 240" stroke="#8B5CF6" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrPurple)" fill="none"/>
-  <rect x="830" y="175" width="120" height="18" rx="9" fill="#0A0A0B"/>
-  <text x="890" y="188" text-anchor="middle" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">signs transactions</text>
+    <text x="350" y="55" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; 1% max slippage guard</text>
+    <text x="350" y="75" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; Deposit cap per token</text>
+    <text x="350" y="95" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; Nonce-based replay protection</text>
+    <text x="350" y="115" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; OApp trusted peer validation</text>
 
-  <!-- Backend → Source Chain (reads chain data) -->
-  <path d="M 380 375 L 500 375" stroke="#3B82F6" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrBlue)" fill="none"/>
-  <rect x="400" y="360" width="100" height="18" rx="9" fill="#0A0A0B"/>
-  <text x="450" y="373" text-anchor="middle" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">reads chain data</text>
+    <text x="670" y="55" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; 24-hour admin timelock (SwapTimelock)</text>
+    <text x="670" y="75" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; On-chain activity monitoring (SecurityMonitor)</text>
+    <text x="670" y="95" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; Chainlink price oracle integration</text>
+    <text x="670" y="115" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; 30-min refund timeout for failed bridges</text>
 
-  <!-- Source BridgeAdapter → LayerZero -->
-  <path d="M 840 550 C 840 610, 700 620, 700 620" stroke="#EC4899" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrPink)" fill="none"/>
-  <rect x="770" y="575" width="130" height="18" rx="9" fill="#0A0A0B"/>
-  <text x="835" y="588" text-anchor="middle" font-family="Inter, sans-serif" fill="#EC4899" font-size="10">cross-chain message</text>
+    <text x="1000" y="55" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; CORS + Helmet + Rate limiting (backend)</text>
+    <text x="1000" y="75" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; Input validation (express-validator)</text>
+    <text x="1000" y="95" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; EIP-1559 gas estimation</text>
+    <text x="1000" y="115" font-family="Inter, sans-serif" fill="#9CA3AF" font-size="10">&#x2022; Custom error handling</text>
+  </g>
 
-  <!-- LayerZero → Destination Chain -->
-  <path d="M 660 680 C 600 720, 540 750, 540 790" stroke="#22C55E" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrGreen)" fill="none"/>
-  <rect x="530" y="730" width="120" height="18" rx="9" fill="#0A0A0B"/>
-  <text x="590" y="743" text-anchor="middle" font-family="Inter, sans-serif" fill="#22C55E" font-size="10">delivers message</text>
-
-  <!-- Backend → Destination Chain (polls status) -->
-  <path d="M 230 480 C 230 700, 370 850, 370 850" stroke="#3B82F6" stroke-width="1.5" stroke-dasharray="4 4" stroke-opacity="0.5" marker-end="url(#arrBlue)" fill="none"/>
-  <rect x="220" y="680" width="110" height="18" rx="9" fill="#0A0A0B"/>
-  <text x="275" y="693" text-anchor="middle" font-family="Inter, sans-serif" fill="#3B82F6" font-size="10" fill-opacity="0.7">polls status</text>
-
-  <!-- ==================== TITLE ==================== -->
-  <text x="700" y="1030" text-anchor="middle" font-family="Inter, sans-serif" fill="#4B5563" font-size="12">CrossChain Swap System &#x2014; Architecture Overview</text>
+  <!-- ==================== FOOTER ==================== -->
+  <text x="700" y="1590" text-anchor="middle" font-family="Inter, sans-serif" fill="#4B5563" font-size="11">CrossChain Swap System — Solidity · Next.js 14 · Express · LayerZero V2 · Uniswap V3</text>
+  <text x="700" y="1610" text-anchor="middle" font-family="Inter, sans-serif" fill="#374151" font-size="10">OpenZeppelin v5 · ethers.js v6 · wagmi v2 · RainbowKit · Tailwind CSS</text>
 </svg>

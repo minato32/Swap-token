@@ -38,6 +38,7 @@ interface SwapButtonProps {
   toChain: Chain | null;
   amount: string;
   minAmountOut: string;
+  poolFee: number;
   disabled: boolean;
   onSuccess: (txHash: string) => void;
 }
@@ -59,6 +60,7 @@ export function SwapButton({
   toChain,
   amount,
   minAmountOut,
+  poolFee,
   disabled,
   onSuccess,
 }: SwapButtonProps) {
@@ -77,9 +79,7 @@ export function SwapButton({
   const { writeContractAsync } = useWriteContract();
   const { isLoading: isWaiting } = useWaitForTransactionReceipt({ hash: txHash });
 
-  const isNativeETH = fromToken?.address.toLowerCase() === NATIVE_ADDRESS;
-
-  const { data: allowance, refetch: refetchAllowance } = useReadContract({
+  const { data: _allowance, refetch: refetchAllowance } = useReadContract({
     address: tokenInAddress,
     abi: erc20Abi,
     functionName: "allowance",
@@ -115,6 +115,7 @@ export function SwapButton({
           toChain: chainMap[toChain.id],
           recipient: address,
           minAmountOut,
+          poolFee,
         }),
       });
 

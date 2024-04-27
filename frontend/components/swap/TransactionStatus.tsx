@@ -11,14 +11,19 @@ interface TransactionStatusProps {
   onClose: () => void;
 }
 
-const STATUS_STEPS: { key: TxStatus; label: string }[] = [
+const CROSS_CHAIN_STEPS: { key: TxStatus; label: string }[] = [
   { key: "PENDING", label: "Submitted" },
   { key: "SOURCE_CONFIRMED", label: "Source Confirmed" },
   { key: "BRIDGING", label: "Bridging" },
   { key: "DELIVERED", label: "Complete" },
 ];
 
-const STATUS_INDEX: Record<TxStatus, number> = {
+const SAME_CHAIN_STEPS: { key: TxStatus; label: string }[] = [
+  { key: "PENDING", label: "Submitted" },
+  { key: "DELIVERED", label: "Swap Complete" },
+];
+
+const CROSS_CHAIN_INDEX: Record<TxStatus, number> = {
   PENDING: 0,
   SOURCE_CONFIRMED: 1,
   BRIDGING: 2,
@@ -26,13 +31,25 @@ const STATUS_INDEX: Record<TxStatus, number> = {
   FAILED: -1,
 };
 
+const SAME_CHAIN_INDEX: Record<TxStatus, number> = {
+  PENDING: 0,
+  SOURCE_CONFIRMED: 1,
+  BRIDGING: 1,
+  DELIVERED: 1,
+  FAILED: -1,
+};
+
 export function TransactionStatus({ txHash, srcChain, dstChain, onClose }: TransactionStatusProps) {
   const { result, loading } = useTransactionStatus(txHash, srcChain, dstChain);
+
+  const isSameChain = srcChain === dstChain;
+  const steps = isSameChain ? SAME_CHAIN_STEPS : CROSS_CHAIN_STEPS;
+  const indexMap = isSameChain ? SAME_CHAIN_INDEX : CROSS_CHAIN_INDEX;
 
   const currentStatus = result?.status || "PENDING";
   const isFailed = currentStatus === "FAILED";
   const isComplete = currentStatus === "DELIVERED";
-  const currentIndex = STATUS_INDEX[currentStatus];
+  const currentIndex = indexMap[currentStatus];
 
   return (
     <div className="w-full max-w-md p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]">
@@ -59,14 +76,16 @@ export function TransactionStatus({ txHash, srcChain, dstChain, onClose }: Trans
           </div>
           <p className="text-sm font-medium text-red-400">Transaction Failed</p>
           <p className="text-xs text-[var(--color-text-secondary)] mt-1">
-            The swap could not be completed. Your tokens will be refundable after 30 minutes.
+            {isSameChain
+              ? "The swap could not be completed. Please try again."
+              : "The swap could not be completed. Your tokens will be refundable after 30 minutes."}
           </p>
         </div>
       ) : (
         <div className="space-y-4">
-          {STATUS_STEPS.map((step, i) => {
-            const isActive = i === currentIndex;
-            const isDone = i < currentIndex;
+          {steps.map((step, i) => {
+            const isDone = isComplete ? true : i < currentIndex;
+            const isActive = !isComplete && i === currentIndex;
 
             return (
               <div key={step.key} className="flex items-center gap-3">
@@ -87,7 +106,7 @@ export function TransactionStatus({ txHash, srcChain, dstChain, onClose }: Trans
                     </div>
                   )}
 
-                  {i < STATUS_STEPS.length - 1 && (
+                  {i < steps.length - 1 && (
                     <div className={`w-0.5 h-5 mt-1 ${isDone ? "bg-green-500" : "bg-[var(--color-border)]"}`} />
                   )}
                 </div>
@@ -110,7 +129,7 @@ export function TransactionStatus({ txHash, srcChain, dstChain, onClose }: Trans
         </div>
       )}
 
-      {result?.layerZeroScanUrl && (
+      {!isSameChain && result?.layerZeroScanUrl && (
         <a
           href={result.layerZeroScanUrl}
           target="_blank"
@@ -118,6 +137,17 @@ export function TransactionStatus({ txHash, srcChain, dstChain, onClose }: Trans
           className="block mt-4 text-center text-xs text-primary-400 hover:text-primary-300 transition-colors"
         >
           View on LayerZero Scan
+        </a>
+      )}
+
+      {isSameChain && isComplete && (
+        <a
+          href={`https://sepolia.etherscan.io/tx/${txHash}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block mt-4 text-center text-xs text-primary-400 hover:text-primary-300 transition-colors"
+        >
+          View on Etherscan
         </a>
       )}
 

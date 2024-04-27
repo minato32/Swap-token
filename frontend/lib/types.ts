@@ -12,6 +12,7 @@ export interface SwapQuote {
   swapType: "same-chain" | "cross-chain";
   inputAmountUsd: string | null;
   outputAmountUsd: string | null;
+  uniswapFeeTier: number;
 }
 
 export interface SwapRequest {

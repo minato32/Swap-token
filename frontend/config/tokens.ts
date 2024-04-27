@@ -26,14 +26,6 @@ export const SUPPORTED_TOKENS: Record<number, Token[]> = {
       logo: "/tokens/usdc.svg",
       chainId: 11155111,
     },
-    {
-      symbol: "XCTT",
-      name: "CrossChain Test Token",
-      address: "0xB2ddC47B08971Fab819E0AF9eA171223B7408ed6",
-      decimals: 18,
-      logo: "/tokens/eth.svg",
-      chainId: 11155111,
-    },
   ],
 
   // Amoy (ChainID: 80002)
