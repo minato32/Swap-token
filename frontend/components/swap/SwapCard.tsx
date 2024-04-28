@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { ChainSelector } from "./ChainSelector";
 import { QuoteDetails } from "./QuoteDetails";
 import { RouteBreakdown } from "./RouteBreakdown";
@@ -8,11 +8,14 @@ import { SwapButton } from "./SwapButton";
 import { TokenSelector } from "@/components/token/TokenSelector";
 import { Skeleton } from "@/components/ui";
 import { useSwapQuote } from "@/hooks/useSwapQuote";
+import { SUPPORTED_CHAINS } from "@/lib/constants";
+import { SUPPORTED_TOKENS } from "@/config/tokens";
 import type { Chain } from "@/lib/types";
 import type { Token } from "@/config/tokens";
 
 interface SwapCardProps {
   onSwapSuccess: (txHash: string, srcChain: string, dstChain: string) => void;
+  initialFromToken?: { chainId: number; symbol: string } | null;
 }
 
 const CHAIN_NAME_MAP: Record<number, string> = {
@@ -21,12 +24,21 @@ const CHAIN_NAME_MAP: Record<number, string> = {
   97: "bsc",
 };
 
-export function SwapCard({ onSwapSuccess }: SwapCardProps) {
+export function SwapCard({ onSwapSuccess, initialFromToken }: SwapCardProps) {
   const [fromChain, setFromChain] = useState<Chain | null>(null);
   const [toChain, setToChain] = useState<Chain | null>(null);
   const [fromToken, setFromToken] = useState<Token | null>(null);
   const [toToken, setToToken] = useState<Token | null>(null);
   const [amount, setAmount] = useState("");
+
+  useEffect(() => {
+    if (!initialFromToken) return;
+    const chain = SUPPORTED_CHAINS.find((c) => c.id === initialFromToken.chainId);
+    const tokens = SUPPORTED_TOKENS[initialFromToken.chainId] || [];
+    const token = tokens.find((t) => t.symbol === initialFromToken.symbol);
+    if (chain) setFromChain(chain);
+    if (token) setFromToken(token);
+  }, [initialFromToken]);
 
   const fromChainKey = fromChain ? CHAIN_NAME_MAP[fromChain.id] : "";
   const toChainKey = toChain ? CHAIN_NAME_MAP[toChain.id] : "";
@@ -94,12 +106,12 @@ export function SwapCard({ onSwapSuccess }: SwapCardProps) {
         </div>
       </div>
 
-      {/* Horizontal Swap Layout */}
-      <div className="flex items-stretch gap-2">
+      {/* Swap Layout — stacks on mobile, horizontal on desktop */}
+      <div className="flex flex-col md:flex-row items-stretch gap-2">
         {/* You Pay */}
-        <div className="flex-1 bg-[var(--color-surface)] rounded-2xl p-4 min-w-0">
+        <div className="flex-1 bg-[var(--color-surface)] rounded-2xl p-3 md:p-4 min-w-0">
           <span className="text-xs font-medium text-[var(--color-text-secondary)] mb-3 block">You pay</span>
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-3 md:mb-4">
             <ChainSelector
               selectedChain={fromChain}
               onSelect={handleFromChainChange}
@@ -121,7 +133,7 @@ export function SwapCard({ onSwapSuccess }: SwapCardProps) {
               const val = e.target.value;
               if (val === "" || /^\d*\.?\d*$/.test(val)) setAmount(val);
             }}
-            className="w-full bg-transparent text-3xl font-heading font-bold text-[var(--color-text-primary)]
+            className="w-full bg-transparent text-2xl md:text-3xl font-heading font-bold text-[var(--color-text-primary)]
               placeholder:text-[var(--color-text-secondary)]/20 focus:outline-none"
           />
           <span className="text-[11px] text-[var(--color-text-secondary)] mt-1 block">
@@ -130,15 +142,16 @@ export function SwapCard({ onSwapSuccess }: SwapCardProps) {
         </div>
 
         {/* Swap Direction Button */}
-        <div className="flex items-center -mx-3 relative" style={{ zIndex: 10 }}>
+        <div className="flex md:items-center justify-center -my-2 md:-my-0 md:-mx-3 relative" style={{ zIndex: 10 }}>
           <button
             onClick={handleSwapChains}
             aria-label="Switch chains"
-            className="w-9 h-9 bg-[var(--color-surface-low)] border-4 border-[var(--color-surface-low)] rounded-xl
+            className="w-10 h-10 md:w-9 md:h-9 bg-[var(--color-surface-low)] border-4 border-[var(--color-surface-low)] rounded-xl
               flex items-center justify-center hover:bg-[var(--color-surface)] transition-all duration-200 group"
           >
             <svg
-              className="w-4 h-4 text-[var(--color-text-secondary)] group-hover:text-[#d0bcff] transition-all group-hover:translate-x-0.5 duration-200"
+              className="w-4 h-4 text-[var(--color-text-secondary)] group-hover:text-[#d0bcff] transition-all duration-200
+                rotate-90 md:rotate-0 group-hover:translate-y-0.5 md:group-hover:translate-y-0 md:group-hover:translate-x-0.5"
               fill="none" stroke="currentColor" viewBox="0 0 24 24"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -147,9 +160,9 @@ export function SwapCard({ onSwapSuccess }: SwapCardProps) {
         </div>
 
         {/* You Receive */}
-        <div className="flex-1 bg-[var(--color-surface)] rounded-2xl p-4 min-w-0">
+        <div className="flex-1 bg-[var(--color-surface)] rounded-2xl p-3 md:p-4 min-w-0">
           <span className="text-xs font-medium text-[var(--color-text-secondary)] mb-3 block">You receive</span>
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-3 md:mb-4">
             <ChainSelector
               selectedChain={toChain}
               onSelect={handleToChainChange}
@@ -163,11 +176,11 @@ export function SwapCard({ onSwapSuccess }: SwapCardProps) {
               label=""
             />
           </div>
-          <div className={`text-3xl font-heading font-bold truncate ${
+          <div className={`text-2xl md:text-3xl font-heading font-bold truncate ${
             quote && !quoteLoading ? "text-[var(--color-text-primary)]" : "text-[var(--color-text-secondary)]/20"
           }`}>
             {quoteLoading ? (
-              <div className="h-9 flex items-center">
+              <div className="h-8 md:h-9 flex items-center">
                 <div className="w-24 h-5 rounded-lg bg-[var(--color-border)] animate-pulse" />
               </div>
             ) : (

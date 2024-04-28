@@ -82,29 +82,29 @@ export function RouteBreakdown(props: RouteBreakdownProps) {
 
       {expanded && (
         <div className="mt-4 relative">
-          {/* Progress Bar Background */}
-          <div className="absolute top-5 left-[10%] right-[10%] h-[2px] bg-[var(--color-border)]" />
+          {/* Progress Bar Background — hidden on mobile (vertical layout) */}
+          <div className="hidden md:block absolute top-5 left-[10%] right-[10%] h-[2px] bg-[var(--color-border)]" />
 
-          {/* Active Progress */}
+          {/* Active Progress — hidden on mobile */}
           {activeStep >= 0 && (
             <div
-              className="absolute top-5 left-[10%] h-[2px] bg-gradient-to-r from-[#d0bcff] to-[#ffb0cd] transition-all duration-700"
+              className="hidden md:block absolute top-5 left-[10%] h-[2px] bg-gradient-to-r from-[#d0bcff] to-[#ffb0cd] transition-all duration-700"
               style={{ width: `${Math.min(activeStep / (steps.length - 1), 1) * 80}%` }}
             />
           )}
 
-          {/* Steps */}
-          <div className="relative flex items-start justify-between">
+          {/* Steps — vertical on mobile, horizontal on desktop */}
+          <div className="relative flex flex-col md:flex-row items-start md:items-start md:justify-between gap-3 md:gap-0">
             {steps.map((step, i) => {
               const isCompleted = i <= activeStep;
               const isActive = i === activeStep;
               const isPending = i > activeStep && activeStep >= 0;
 
               return (
-                <div key={step.label} className={`flex flex-col items-center ${isSameChain ? "w-[25%]" : "w-[20%]"}`}>
+                <div key={step.label} className={`flex flex-row md:flex-col items-center gap-3 md:gap-0 ${isSameChain ? "md:w-[25%]" : "md:w-[20%]"}`}>
                   {/* Step Circle */}
                   <div
-                    className={`relative w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500
+                    className={`relative w-8 h-8 md:w-10 md:h-10 shrink-0 rounded-full flex items-center justify-center transition-all duration-500
                       ${isActive
                         ? "bg-[#d0bcff] text-black shadow-[0_0_20px_rgba(208,188,255,0.5)] scale-110"
                         : isCompleted
@@ -127,22 +127,22 @@ export function RouteBreakdown(props: RouteBreakdownProps) {
                     )}
                   </div>
 
-                  {/* Label */}
-                  <p className={`text-[10px] font-heading font-bold mt-2 text-center transition-colors
-                    ${isActive ? "text-[#d0bcff]" : isCompleted ? "text-[var(--color-text-primary)]" : "text-[var(--color-text-secondary)] opacity-50"}`}>
-                    {step.label}
+                  {/* Label + Detail */}
+                  <div className="flex flex-col md:items-center md:mt-2">
+                    <p className={`text-[11px] md:text-[10px] font-heading font-bold text-left md:text-center transition-colors
+                      ${isActive ? "text-[#d0bcff]" : isCompleted ? "text-[var(--color-text-primary)]" : "text-[var(--color-text-secondary)] opacity-50"}`}>
+                      {step.label}
+                    </p>
+                    <p className={`text-[10px] md:text-[9px] text-left md:text-center mt-0.5 transition-colors
+                      ${isActive ? "text-[#ffb0cd]" : "text-[var(--color-text-secondary)] opacity-40"}`}>
+                      {step.detail}
                   </p>
 
-                  {/* Detail */}
-                  <p className={`text-[9px] text-center mt-0.5 transition-colors
-                    ${isActive ? "text-[#ffb0cd]" : "text-[var(--color-text-secondary)] opacity-40"}`}>
-                    {step.detail}
-                  </p>
-
-                  {/* Sub Detail */}
-                  <p className="text-[8px] text-[var(--color-text-secondary)] opacity-30 text-center mt-0.5">
-                    {step.sub}
-                  </p>
+                    {/* Sub Detail */}
+                    <p className="text-[9px] md:text-[8px] text-[var(--color-text-secondary)] opacity-30 text-left md:text-center mt-0.5">
+                      {step.sub}
+                    </p>
+                  </div>
 
                   {/* Token Icon for first and last */}
                   {(i === 0 || i === steps.length - 1) && TOKEN_ICONS[step.detail] && (

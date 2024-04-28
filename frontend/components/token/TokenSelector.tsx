@@ -70,7 +70,7 @@ export function TokenSelector({ chainId, selectedToken, onSelect, excludeAddress
         <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 200 }}>
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
 
-          <div className="relative w-full max-w-[400px] bg-[var(--color-surface-low)] border border-[var(--color-border)] rounded-3xl overflow-hidden shadow-2xl">
+          <div className="relative w-full max-w-[calc(100vw-2rem)] md:max-w-[400px] bg-[var(--color-surface-low)] border border-[var(--color-border)] rounded-3xl overflow-hidden shadow-2xl">
             {/* Header */}
             <div className="flex items-center justify-between p-5 pb-3">
               <h3 className="font-heading font-bold text-lg text-[var(--color-text-primary)]">Select a token</h3>

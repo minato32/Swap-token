@@ -32,23 +32,23 @@ export function ChainSelector({ selectedChain, onSelect, excludeChainId, label }
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 px-3 py-2.5 rounded-full w-full
+        className="flex items-center gap-1.5 px-2 md:px-3 py-2 md:py-2.5 rounded-full w-full
           bg-[var(--color-surface-low)] border border-[var(--color-border)]
-          hover:border-[#d0bcff]/30 transition-colors text-left"
+          hover:border-[#d0bcff]/30 transition-colors text-left min-w-0"
       >
         {selectedChain ? (
           <>
             <img
               src={CHAIN_ICONS[selectedChain.name]}
               alt={selectedChain.name}
-              className="w-6 h-6 rounded-full shrink-0 object-cover"
+              className="w-5 h-5 md:w-6 md:h-6 rounded-full shrink-0 object-cover"
             />
-            <span className="font-heading font-semibold text-sm text-[var(--color-text-primary)] truncate">
+            <span className="font-heading font-semibold text-xs md:text-sm text-[var(--color-text-primary)] truncate">
               {selectedChain.name}
             </span>
           </>
         ) : (
-          <span className="text-sm text-[var(--color-text-secondary)]">Select chain</span>
+          <span className="text-xs md:text-sm text-[var(--color-text-secondary)] truncate">Select chain</span>
         )}
         <svg className="ml-auto w-4 h-4 text-[var(--color-text-secondary)] shrink-0" viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
@@ -60,7 +60,7 @@ export function ChainSelector({ selectedChain, onSelect, excludeChainId, label }
         <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 200 }}>
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
 
-          <div className="relative w-full max-w-[400px] bg-[var(--color-surface-low)] border border-[var(--color-border)] rounded-3xl overflow-hidden shadow-2xl">
+          <div className="relative w-full max-w-[calc(100vw-2rem)] md:max-w-[400px] bg-[var(--color-surface-low)] border border-[var(--color-border)] rounded-3xl overflow-hidden shadow-2xl">
             {/* Header */}
             <div className="flex items-center justify-between p-5 pb-4">
               <h3 className="font-heading font-bold text-lg text-[var(--color-text-primary)]">Select a chain</h3>
