@@ -24,6 +24,9 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: "CrossChain Swap",
   description: "Swap tokens seamlessly across multiple blockchains",
+  icons: {
+    icon: "/Favicon.svg",
+  },
 };
 
 export default function RootLayout({
