@@ -30,6 +30,9 @@ contract TokenVault is Ownable, ReentrancyGuard, Pausable {
     /// @notice Current total locked amount per token
     mapping(address => uint256) public totalLocked;
 
+    /// @notice Pre-funded reserve per token available for bridged token releases (S-03)
+    mapping(address => uint256) public bridgedReserve;
+
     struct Deposit {
         address token;
         uint256 amount;
@@ -61,6 +64,13 @@ contract TokenVault is Ownable, ReentrancyGuard, Pausable {
         uint256 amount
     );
 
+    event BridgedTokensReleased(
+        address indexed token,
+        uint256 amount,
+        address indexed recipient
+    );
+
+    event BridgeReserveFunded(address indexed token, uint256 amount);
     event SwapRouterUpdated(address indexed oldRouter, address indexed newRouter);
     event BridgeAdapterUpdated(address indexed oldAdapter, address indexed newAdapter);
 
@@ -75,6 +85,7 @@ contract TokenVault is Ownable, ReentrancyGuard, Pausable {
     error LockNotExpired();
     error OnlyDepositor();
     error DepositCapExceeded();
+    error InsufficientBridgeReserve();
 
     event MaxDepositCapUpdated(address indexed token, uint256 oldCap, uint256 newCap);
 
@@ -119,6 +130,7 @@ contract TokenVault is Ownable, ReentrancyGuard, Pausable {
 
     /**
      * @notice Release locked tokens to the recipient after successful bridge delivery
+     * @dev Intentionally works during pause to ensure users can always receive bridged funds
      * @param _depositId Unique identifier of the deposit
      * @param _recipient Address to receive the tokens
      */
@@ -143,7 +155,33 @@ contract TokenVault is Ownable, ReentrancyGuard, Pausable {
     }
 
     /**
+     * @notice Release pre-funded tokens to a cross-chain bridge recipient
+     * @dev Intentionally works during pause so recipients can always claim delivered funds.
+     *      Debits from bridgedReserve and reverts if the reserve is insufficient (S-03).
+     * @param _token Token address to release
+     * @param _amount Amount to release
+     * @param _recipient Address to receive the tokens
+     */
+    function releaseBridgedTokens(
+        address _token,
+        uint256 _amount,
+        address _recipient
+    ) external nonReentrant {
+        if (msg.sender != bridgeAdapter) revert OnlyBridgeAdapter();
+        if (_recipient == address(0)) revert ZeroAddress();
+        if (_amount == 0) revert ZeroAmount();
+        if (bridgedReserve[_token] < _amount) revert InsufficientBridgeReserve();
+
+        bridgedReserve[_token] -= _amount;
+
+        IERC20(_token).safeTransfer(_recipient, _amount);
+
+        emit BridgedTokensReleased(_token, _amount, _recipient);
+    }
+
+    /**
      * @notice Refund locked tokens to the original sender after timeout expires
+     * @dev Intentionally works during pause so depositors can always recover timed-out funds
      * @param _depositId Unique identifier of the deposit
      */
     function refund(bytes32 _depositId) external nonReentrant {
@@ -160,6 +198,22 @@ contract TokenVault is Ownable, ReentrancyGuard, Pausable {
         IERC20(deposit.token).safeTransfer(deposit.sender, deposit.amount);
 
         emit TokensRefunded(_depositId, deposit.sender, deposit.amount);
+    }
+
+    /**
+     * @notice Deposit tokens into the bridge reserve for funding incoming cross-chain deliveries
+     * @param _token Address of the ERC20 token to fund
+     * @param _amount Amount to deposit into the reserve
+     */
+    function fundBridgeReserve(address _token, uint256 _amount) external onlyOwner {
+        if (_token == address(0)) revert ZeroAddress();
+        if (_amount == 0) revert ZeroAmount();
+
+        bridgedReserve[_token] += _amount;
+
+        IERC20(_token).safeTransferFrom(msg.sender, address(this), _amount);
+
+        emit BridgeReserveFunded(_token, _amount);
     }
 
     /**

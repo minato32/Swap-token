@@ -7,6 +7,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 
 interface ITokenVault {
     function releaseTokens(bytes32 _depositId, address _recipient) external;
+    function releaseBridgedTokens(address _token, uint256 _amount, address _recipient) external;
 }
 
 /**
@@ -23,6 +24,12 @@ contract BridgeAdapter is OApp, ReentrancyGuard {
 
     /// @notice Address of the TokenVault contract on this chain
     address public tokenVault;
+
+    /// @notice Maps source chain token addresses to local equivalents
+    mapping(address => address) public tokenMapping;
+
+    /// @notice Maximum tokens releasable per incoming message per local token (S-07)
+    mapping(address => uint256) public maxReleasablePerMessage;
 
     event MessageSent(
         uint32 indexed dstEid,
@@ -41,11 +48,14 @@ contract BridgeAdapter is OApp, ReentrancyGuard {
 
     event SwapRouterUpdated(address indexed oldRouter, address indexed newRouter);
     event TokenVaultUpdated(address indexed oldVault, address indexed newVault);
+    event MaxReleasableUpdated(address indexed token, uint256 limit);
 
     error ZeroAddress();
     error NonceAlreadyProcessed();
     error OnlySwapRouter();
     error TokenVaultNotSet();
+    error NoTokenMapping();
+    error AmountExceedsLimit();
 
     constructor(address _endpoint, address _delegate) OApp(_endpoint, _delegate) Ownable(_delegate) {}
 
@@ -56,6 +66,7 @@ contract BridgeAdapter is OApp, ReentrancyGuard {
      * @param _amount Amount of tokens to release on destination
      * @param _recipient Address that receives tokens on the destination chain
      * @param _depositId Unique deposit identifier for vault tracking
+     * @param _refundAddress Address to receive any excess LayerZero messaging fee refund
      * @param _options LayerZero messaging options
      */
     function sendBridgeMessage(
@@ -64,6 +75,7 @@ contract BridgeAdapter is OApp, ReentrancyGuard {
         uint256 _amount,
         address _recipient,
         bytes32 _depositId,
+        address _refundAddress,
         bytes calldata _options
     ) external payable nonReentrant returns (MessagingReceipt memory receipt) {
         if (msg.sender != swapRouter) revert OnlySwapRouter();
@@ -75,7 +87,7 @@ contract BridgeAdapter is OApp, ReentrancyGuard {
             payload,
             _options,
             MessagingFee(msg.value, 0),
-            payable(msg.sender)
+            payable(_refundAddress)
         );
 
         emit MessageSent(_dstEid, _recipient, receipt.nonce, payload);
@@ -96,12 +108,7 @@ contract BridgeAdapter is OApp, ReentrancyGuard {
         if (processedNonces[_origin.srcEid][_origin.nonce]) revert NonceAlreadyProcessed();
         processedNonces[_origin.srcEid][_origin.nonce] = true;
 
-        (address token, uint256 amount, address recipient, bytes32 depositId) =
-            abi.decode(_message, (address, uint256, address, bytes32));
-
-        ITokenVault(tokenVault).releaseTokens(depositId, recipient);
-
-        emit MessageReceived(_origin.srcEid, recipient, token, amount, _origin.nonce);
+        _processMessage(_origin.srcEid, _origin.nonce, _message);
     }
 
     /**
@@ -145,6 +152,42 @@ contract BridgeAdapter is OApp, ReentrancyGuard {
         address old = tokenVault;
         tokenVault = _tokenVault;
         emit TokenVaultUpdated(old, _tokenVault);
+    }
+
+    /**
+     * @notice Set the per-message release cap for a local token
+     * @param _localToken Local token address
+     * @param _limit Maximum amount releasable in a single incoming message (0 = unlimited)
+     */
+    function setMaxReleasablePerMessage(address _localToken, uint256 _limit) external onlyOwner {
+        if (_localToken == address(0)) revert ZeroAddress();
+        maxReleasablePerMessage[_localToken] = _limit;
+        emit MaxReleasableUpdated(_localToken, _limit);
+    }
+
+    /**
+     * @notice Map a source chain token to its local equivalent
+     * @param _sourceToken Token address on the source chain
+     * @param _localToken Equivalent token address on this chain
+     */
+    function setTokenMapping(address _sourceToken, address _localToken) external onlyOwner {
+        if (_sourceToken == address(0) || _localToken == address(0)) revert ZeroAddress();
+        tokenMapping[_sourceToken] = _localToken;
+    }
+
+    function _processMessage(uint32 srcEid, uint64 nonce, bytes calldata message) internal {
+        (address token, uint256 amount, address recipient, ) =
+            abi.decode(message, (address, uint256, address, bytes32));
+
+        address localToken = tokenMapping[token];
+        if (localToken == address(0)) revert NoTokenMapping();
+
+        uint256 limit = maxReleasablePerMessage[localToken];
+        if (limit > 0 && amount > limit) revert AmountExceedsLimit();
+
+        ITokenVault(tokenVault).releaseBridgedTokens(localToken, amount, recipient);
+
+        emit MessageReceived(srcEid, recipient, localToken, amount, nonce);
     }
 
     receive() external payable {}
