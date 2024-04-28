@@ -39,10 +39,6 @@ coverage.json
 # Misc
 *.tsbuildinfo
 
-# Project brain (local documentation)
+# Local config
 .brain/
-
-# Claude Code
-CLAUDE.md
-
-
+*.local.json
