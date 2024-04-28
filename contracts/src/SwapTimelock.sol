@@ -15,6 +15,9 @@ contract SwapTimelock is Ownable {
     /// @notice Maximum time an operation stays valid after delay passes
     uint256 public constant GRACE_PERIOD = 48 hours;
 
+    /// @notice Monotonically incrementing counter used to prevent operation ID collisions (S-11)
+    uint256 private scheduleNonce;
+
     struct TimelockOperation {
         address target;
         bytes data;
@@ -59,7 +62,7 @@ contract SwapTimelock is Ownable {
     ) external onlyOwner returns (bytes32 operationId) {
         if (_target == address(0)) revert ZeroAddress();
 
-        operationId = keccak256(abi.encode(_target, _data, block.timestamp));
+        operationId = keccak256(abi.encode(_target, _data, block.timestamp, scheduleNonce++));
 
         if (operations[operationId].scheduledAt != 0) revert OperationAlreadyScheduled();
 

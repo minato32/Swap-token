@@ -35,6 +35,9 @@ contract SecurityMonitor is Ownable {
     /// @notice Flagged addresses for review
     mapping(address => bool) public blacklisted;
 
+    /// @notice Addresses permitted to call recordSwap (S-06)
+    mapping(address => bool) public authorizedCallers;
+
     event LargeSwapDetected(
         address indexed user,
         uint256 amount,
@@ -56,9 +59,16 @@ contract SecurityMonitor is Ownable {
     event LargeSwapThresholdUpdated(uint256 oldThreshold, uint256 newThreshold);
     event MaxSwapsPerWindowUpdated(uint256 oldMax, uint256 newMax);
     event CooldownWindowUpdated(uint256 oldWindow, uint256 newWindow);
+    event AuthorizedCallerUpdated(address indexed caller, bool authorized);
 
     error ZeroAddress();
     error AddressIsBlacklisted();
+    error NotAuthorized();
+
+    modifier onlyAuthorized() {
+        if (!authorizedCallers[msg.sender] && msg.sender != owner()) revert NotAuthorized();
+        _;
+    }
 
     constructor() Ownable(msg.sender) {}
 
@@ -67,10 +77,14 @@ contract SecurityMonitor is Ownable {
      * @param _user Address of the user performing the swap
      * @param _amount Amount being swapped
      */
-    function recordSwap(address _user, uint256 _amount) external {
+    function recordSwap(address _user, uint256 _amount) external onlyAuthorized {
         if (blacklisted[_user]) revert AddressIsBlacklisted();
 
         UserActivity storage activity = userActivity[_user];
+
+        if (activity.windowStart == 0) {
+            activity.windowStart = block.timestamp;
+        }
 
         if (block.timestamp > activity.windowStart + cooldownWindow) {
             activity.swapCount = 0;
@@ -99,6 +113,17 @@ contract SecurityMonitor is Ownable {
             );
             emit AddressFlagged(_user, "Rapid swap activity detected");
         }
+    }
+
+    /**
+     * @notice Grant or revoke authorization to call recordSwap
+     * @param _caller Address to update
+     * @param _authorized True to authorize, false to revoke
+     */
+    function setAuthorizedCaller(address _caller, bool _authorized) external onlyOwner {
+        if (_caller == address(0)) revert ZeroAddress();
+        authorizedCallers[_caller] = _authorized;
+        emit AuthorizedCallerUpdated(_caller, _authorized);
     }
 
     /**

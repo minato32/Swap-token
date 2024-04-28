@@ -110,6 +110,15 @@ contract SwapRouter is Ownable, ReentrancyGuard, Pausable {
 
     constructor() Ownable(msg.sender) {}
 
+    receive() external payable {}
+
+    function withdrawETH() external onlyOwner {
+        uint256 balance = address(this).balance;
+        if (balance == 0) revert ZeroAmount();
+        (bool success, ) = payable(owner()).call{value: balance}("");
+        require(success, "ETH transfer failed");
+    }
+
     /**
      * @notice Initiate a cross-chain token swap
      * @param token The ERC20 token address to swap (source chain)
@@ -213,6 +222,8 @@ contract SwapRouter is Ownable, ReentrancyGuard, Pausable {
                 sqrtPriceLimitX96: 0
             })
         );
+
+        IERC20(tokenIn).forceApprove(uniswapRouter, 0);
 
         emit SwapExecuted(msg.sender, tokenIn, tokenOut, amount, amountOut, poolFee, block.timestamp);
     }

@@ -42,11 +42,15 @@ contract PriceOracle is Ownable {
     /// @notice Whether to use fallback prices (true on testnet)
     bool public useFallback;
 
+    /// @notice Addresses permitted to call validateSwapPrice
+    mapping(address => bool) public authorizedCallers;
+
     event PriceFeedUpdated(address indexed token, address indexed feed, uint256 stalenessThreshold);
     event PriceFeedRemoved(address indexed token);
     event FallbackPriceSet(address indexed token, uint256 price);
     event MaxDeviationUpdated(uint256 oldDeviation, uint256 newDeviation);
     event SuspiciousPriceDetected(address indexed token, uint256 price, uint256 expectedPrice);
+    event AuthorizedCallerUpdated(address indexed caller, bool authorized);
 
     error ZeroAddress();
     error PriceFeedNotSet();
@@ -54,6 +58,14 @@ contract PriceOracle is Ownable {
     error NegativePrice();
     error PriceDeviationTooHigh(uint256 spotPrice, uint256 expectedPrice, uint256 deviationBps);
     error FallbackPriceNotSet();
+    error NotAuthorized();
+    error DeviationTooHigh();
+    error ThresholdTooLow();
+
+    modifier onlyAuthorized() {
+        if (!authorizedCallers[msg.sender] && msg.sender != owner()) revert NotAuthorized();
+        _;
+    }
 
     constructor(bool _useFallback) Ownable(msg.sender) {
         useFallback = _useFallback;
@@ -131,7 +143,7 @@ contract PriceOracle is Ownable {
         address _toToken,
         uint256 _inputAmount,
         uint256 _outputAmount
-    ) external returns (bool valid) {
+    ) external onlyAuthorized returns (bool valid) {
         uint256 fromPrice = this.getPrice(_fromToken);
         uint256 toPrice = this.getPrice(_toToken);
 
@@ -156,7 +168,7 @@ contract PriceOracle is Ownable {
      * @notice Set a Chainlink price feed for a token
      * @param _token Address of the token
      * @param _feed Address of the Chainlink aggregator
-     * @param _stalenessThreshold Max seconds since last update before price is stale
+     * @param _stalenessThreshold Max seconds since last update before price is stale (minimum 60)
      */
     function setPriceFeed(
         address _token,
@@ -164,6 +176,7 @@ contract PriceOracle is Ownable {
         uint256 _stalenessThreshold
     ) external onlyOwner {
         if (_token == address(0) || _feed == address(0)) revert ZeroAddress();
+        if (_stalenessThreshold < 60) revert ThresholdTooLow();
 
         priceFeeds[_token] = PriceFeed({
             feed: _feed,
@@ -196,9 +209,10 @@ contract PriceOracle is Ownable {
 
     /**
      * @notice Update the maximum allowed price deviation
-     * @param _maxDeviation New max deviation in basis points
+     * @param _maxDeviation New max deviation in basis points (maximum 2000)
      */
     function setMaxDeviation(uint256 _maxDeviation) external onlyOwner {
+        if (_maxDeviation > 2000) revert DeviationTooHigh();
         uint256 old = maxDeviation;
         maxDeviation = _maxDeviation;
         emit MaxDeviationUpdated(old, _maxDeviation);
@@ -210,5 +224,16 @@ contract PriceOracle is Ownable {
      */
     function setUseFallback(bool _useFallback) external onlyOwner {
         useFallback = _useFallback;
+    }
+
+    /**
+     * @notice Grant or revoke authorization to call validateSwapPrice
+     * @param _caller Address to update
+     * @param _authorized True to authorize, false to revoke
+     */
+    function setAuthorizedCaller(address _caller, bool _authorized) external onlyOwner {
+        if (_caller == address(0)) revert ZeroAddress();
+        authorizedCallers[_caller] = _authorized;
+        emit AuthorizedCallerUpdated(_caller, _authorized);
     }
 }

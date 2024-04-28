@@ -52,6 +52,7 @@ contract FeeManager is Ownable {
     error InsufficientFees();
     error OnlySwapRouter();
     error InvalidFeeTier();
+    error CannotRemoveDefaultTier();
 
     /**
      * @notice Initialize with treasury and the 4 Uniswap-style fee tiers
@@ -138,6 +139,7 @@ contract FeeManager is Ownable {
      * @param _feeBps Fee tier in basis points to remove
      */
     function removeFeeTier(uint256 _feeBps) external onlyOwner {
+        if (_feeBps == defaultFeeBps) revert CannotRemoveDefaultTier();
         validFeeTiers[_feeBps] = false;
         emit FeeTierRemoved(_feeBps);
     }
