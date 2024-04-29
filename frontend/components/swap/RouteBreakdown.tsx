@@ -68,7 +68,7 @@ export function RouteBreakdown(props: RouteBreakdownProps) {
     <div className="mt-3">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-1.5 text-xs font-medium text-[#d0bcff] hover:text-[#c4a8ff] transition-colors"
+        className="flex items-center gap-1.5 text-xs font-medium text-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors"
       >
         <svg
           className={`w-3.5 h-3.5 transition-transform duration-200 ${expanded ? "rotate-90" : ""}`}
@@ -88,7 +88,7 @@ export function RouteBreakdown(props: RouteBreakdownProps) {
           {/* Active Progress — hidden on mobile */}
           {activeStep >= 0 && (
             <div
-              className="hidden md:block absolute top-5 left-[10%] h-[2px] bg-gradient-to-r from-[#d0bcff] to-[#ffb0cd] transition-all duration-700"
+              className="hidden md:block absolute top-5 left-[10%] h-[2px] bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] transition-all duration-700"
               style={{ width: `${Math.min(activeStep / (steps.length - 1), 1) * 80}%` }}
             />
           )}
@@ -106,9 +106,9 @@ export function RouteBreakdown(props: RouteBreakdownProps) {
                   <div
                     className={`relative w-8 h-8 md:w-10 md:h-10 shrink-0 rounded-full flex items-center justify-center transition-all duration-500
                       ${isActive
-                        ? "bg-[#d0bcff] text-black shadow-[0_0_20px_rgba(208,188,255,0.5)] scale-110"
+                        ? "bg-[var(--color-primary)] text-black shadow-[0_0_20px_rgba(208,188,255,0.5)] scale-110"
                         : isCompleted
-                          ? "bg-[#d0bcff]/20 text-[#d0bcff] border border-[#d0bcff]/40"
+                          ? "bg-[var(--color-primary)]/20 text-[var(--color-primary)] border border-[var(--color-primary)]/40"
                           : "bg-[var(--color-surface)] text-[var(--color-text-secondary)] border border-[var(--color-border)]"
                       }
                       ${isPending ? "opacity-40" : "opacity-100"}`}
@@ -123,18 +123,18 @@ export function RouteBreakdown(props: RouteBreakdownProps) {
 
                     {/* Active Pulse Ring */}
                     {isActive && (
-                      <div className="absolute inset-0 rounded-full border-2 border-[#d0bcff] animate-ping opacity-30" />
+                      <div className="absolute inset-0 rounded-full border-2 border-[var(--color-primary)] animate-ping opacity-30" />
                     )}
                   </div>
 
                   {/* Label + Detail */}
                   <div className="flex flex-col md:items-center md:mt-2">
                     <p className={`text-[11px] md:text-[10px] font-heading font-bold text-left md:text-center transition-colors
-                      ${isActive ? "text-[#d0bcff]" : isCompleted ? "text-[var(--color-text-primary)]" : "text-[var(--color-text-secondary)] opacity-50"}`}>
+                      ${isActive ? "text-[var(--color-primary)]" : isCompleted ? "text-[var(--color-text-primary)]" : "text-[var(--color-text-secondary)] opacity-50"}`}>
                       {step.label}
                     </p>
                     <p className={`text-[10px] md:text-[9px] text-left md:text-center mt-0.5 transition-colors
-                      ${isActive ? "text-[#ffb0cd]" : "text-[var(--color-text-secondary)] opacity-40"}`}>
+                      ${isActive ? "text-[var(--color-secondary)]" : "text-[var(--color-text-secondary)] opacity-40"}`}>
                       {step.detail}
                   </p>
 

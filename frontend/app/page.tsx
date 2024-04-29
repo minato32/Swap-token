@@ -24,8 +24,7 @@ export default function Home() {
   const TOKEN_CHAIN_MAP: Record<string, number> = {
     ETH: 11155111,
     USDC: 11155111,
-    MATIC: 80002,
-    BNB: 97,
+    XCTT: 80002,
   };
 
   return (
@@ -58,24 +57,24 @@ export default function Home() {
           // Row 1 — top edge
           { token: "ETH", icon: "/tokens/ethereum-eth.png", color: "rgb(98, 126, 234)", top: "4%", left: "5%", size: 60, rotate: 15, floatDur: "8s", rotateDur: "12s" },
           { token: "USDC", icon: "/tokens/USD_Coin_logo_(cropped).png", color: "rgb(38, 138, 255)", top: "3%", left: "48%", size: 32, rotate: -8, floatDur: "5.5s", rotateDur: "14s" },
-          { token: "BNB", icon: "/tokens/Binance-Coin.png", color: "rgb(243, 186, 47)", top: "6%", left: "82%", size: 46, rotate: 12, floatDur: "7s", rotateDur: "13s" },
+          { token: "XCTT", icon: "/tokens/xctt.svg", color: "rgb(124, 58, 237)", top: "6%", left: "82%", size: 46, rotate: 12, floatDur: "7s", rotateDur: "13s" },
           // Row 2 — upper area
-          { token: "MATIC", icon: "/tokens/MAtic.png", color: "rgb(130, 71, 229)", top: "18%", left: "22%", size: 34, rotate: -15, floatDur: "6s", rotateDur: "15s" },
+          { token: "XCTT", icon: "/tokens/xctt.svg", color: "rgb(124, 58, 237)", top: "18%", left: "22%", size: 34, rotate: -15, floatDur: "6s", rotateDur: "15s" },
           { token: "ETH", icon: "/tokens/ethereum-eth.png", color: "rgb(98, 126, 234)", top: "16%", left: "72%", size: 38, rotate: 20, floatDur: "7.5s", rotateDur: "11s" },
           // Row 3 — flanking swap card
-          { token: "BNB", icon: "/tokens/Binance-Coin.png", color: "rgb(243, 186, 47)", top: "36%", left: "2%", size: 50, rotate: -18, floatDur: "9s", rotateDur: "11s" },
+          { token: "XCTT", icon: "/tokens/xctt.svg", color: "rgb(124, 58, 237)", top: "36%", left: "2%", size: 50, rotate: -18, floatDur: "9s", rotateDur: "11s" },
           { token: "USDC", icon: "/tokens/USD_Coin_logo_(cropped).png", color: "rgb(38, 138, 255)", top: "34%", left: "92%", size: 44, rotate: 10, floatDur: "6.5s", rotateDur: "16s" },
           // Row 4 — below swap card
-          { token: "MATIC", icon: "/tokens/MAtic.png", color: "rgb(130, 71, 229)", top: "56%", left: "4%", size: 42, rotate: 22, floatDur: "7s", rotateDur: "10s" },
+          { token: "XCTT", icon: "/tokens/xctt.svg", color: "rgb(124, 58, 237)", top: "56%", left: "4%", size: 42, rotate: 22, floatDur: "7s", rotateDur: "10s" },
           { token: "ETH", icon: "/tokens/ethereum-eth.png", color: "rgb(98, 126, 234)", top: "54%", left: "90%", size: 52, rotate: -12, floatDur: "8s", rotateDur: "14s" },
           // Row 5 — lower area
-          { token: "BNB", icon: "/tokens/Binance-Coin.png", color: "rgb(243, 186, 47)", top: "70%", left: "18%", size: 36, rotate: 8, floatDur: "6s", rotateDur: "13s" },
-          { token: "MATIC", icon: "/tokens/MAtic.png", color: "rgb(130, 71, 229)", top: "68%", left: "60%", size: 30, rotate: -20, floatDur: "5.5s", rotateDur: "15s" },
+          { token: "XCTT", icon: "/tokens/xctt.svg", color: "rgb(124, 58, 237)", top: "70%", left: "18%", size: 36, rotate: 8, floatDur: "6s", rotateDur: "13s" },
+          { token: "XCTT", icon: "/tokens/xctt.svg", color: "rgb(124, 58, 237)", top: "68%", left: "60%", size: 30, rotate: -20, floatDur: "5.5s", rotateDur: "15s" },
           { token: "USDC", icon: "/tokens/USD_Coin_logo_(cropped).png", color: "rgb(38, 138, 255)", top: "72%", left: "85%", size: 40, rotate: 14, floatDur: "7.5s", rotateDur: "12s" },
           // Row 6 — bottom edge
           { token: "ETH", icon: "/tokens/ethereum-eth.png", color: "rgb(98, 126, 234)", top: "86%", left: "8%", size: 48, rotate: -10, floatDur: "8.5s", rotateDur: "11s" },
-          { token: "MATIC", icon: "/tokens/MAtic.png", color: "rgb(130, 71, 229)", top: "88%", left: "45%", size: 44, rotate: 18, floatDur: "6.5s", rotateDur: "14s" },
-          { token: "BNB", icon: "/tokens/Binance-Coin.png", color: "rgb(243, 186, 47)", top: "84%", left: "78%", size: 38, rotate: -16, floatDur: "7s", rotateDur: "12s" },
+          { token: "XCTT", icon: "/tokens/xctt.svg", color: "rgb(124, 58, 237)", top: "88%", left: "45%", size: 44, rotate: 18, floatDur: "6.5s", rotateDur: "14s" },
+          { token: "XCTT", icon: "/tokens/xctt.svg", color: "rgb(124, 58, 237)", top: "84%", left: "78%", size: 38, rotate: -16, floatDur: "7s", rotateDur: "12s" },
         ].map((item, i) => (
           <div
             key={i}
@@ -192,7 +191,6 @@ export default function Home() {
             {[
               { name: "Ethereum", icon: "/chains/Sepolia eth.png" },
               { name: "Polygon", icon: "/chains/Amoy-polygon.webp" },
-              { name: "BNB Chain", icon: "/chains/BSC-BNB.png" },
             ].map((chain) => (
               <div key={chain.name} className="flex items-center gap-2 opacity-40 hover:opacity-70 transition-opacity">
                 <img src={chain.icon} alt={chain.name} className="w-4 h-4 rounded-full object-cover" />

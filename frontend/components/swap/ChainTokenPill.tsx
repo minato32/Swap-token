@@ -67,8 +67,8 @@ export function ChainTokenPill({
         onClick={() => setIsOpen(!isOpen)}
         className={`flex items-center gap-2 rounded-full transition-all
           ${hasSelection
-            ? "pl-2 pr-3 py-1.5 bg-[var(--color-surface-low)] border border-[var(--color-border)] hover:border-[#d0bcff]/40"
-            : "px-4 py-2 bg-[#d0bcff] text-black hover:bg-[#c4a8ff]"
+            ? "pl-2 pr-3 py-1.5 bg-[var(--color-surface-low)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/40"
+            : "px-4 py-2 bg-[var(--color-primary)] text-black hover:bg-[var(--color-primary)]"
           }`}
       >
         {hasSelection ? (
@@ -107,7 +107,7 @@ export function ChainTokenPill({
               onClick={() => setActiveTab("chain")}
               className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors
                 ${activeTab === "chain"
-                  ? "text-[#d0bcff] border-b-2 border-[#d0bcff]"
+                  ? "text-[var(--color-primary)] border-b-2 border-[var(--color-primary)]"
                   : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
                 }`}
             >
@@ -118,7 +118,7 @@ export function ChainTokenPill({
               className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors
                 ${!chain ? "opacity-30 cursor-not-allowed" : ""}
                 ${activeTab === "token"
-                  ? "text-[#d0bcff] border-b-2 border-[#d0bcff]"
+                  ? "text-[var(--color-primary)] border-b-2 border-[var(--color-primary)]"
                   : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
                 }`}
             >
@@ -134,8 +134,8 @@ export function ChainTokenPill({
                   key={c.id}
                   onClick={() => handleChainSelect(c)}
                   className={`flex items-center gap-3 w-full px-3 py-3 rounded-xl text-left transition-colors
-                    hover:bg-white/5
-                    ${chain?.id === c.id ? "bg-[#d0bcff]/10 border border-[#d0bcff]/20" : ""}`}
+                    hover:bg-[var(--color-primary)]/5
+                    ${chain?.id === c.id ? "bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20" : ""}`}
                 >
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
@@ -148,7 +148,7 @@ export function ChainTokenPill({
                     <p className="text-[10px] text-[var(--color-text-secondary)]">{c.symbol}</p>
                   </div>
                   {chain?.id === c.id && (
-                    <svg className="ml-auto w-4 h-4 text-[#d0bcff]" viewBox="0 0 20 20" fill="currentColor">
+                    <svg className="ml-auto w-4 h-4 text-[var(--color-primary)]" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   )}
@@ -165,8 +165,8 @@ export function ChainTokenPill({
                     key={t.address}
                     onClick={() => handleTokenSelect(t)}
                     className={`flex items-center gap-3 w-full px-3 py-3 rounded-xl text-left transition-colors
-                      hover:bg-white/5
-                      ${token?.address === t.address ? "bg-[#d0bcff]/10 border border-[#d0bcff]/20" : ""}`}
+                      hover:bg-[var(--color-primary)]/5
+                      ${token?.address === t.address ? "bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20" : ""}`}
                   >
                     <TokenIcon symbol={t.symbol} />
                     <div className="flex-1 min-w-0">
@@ -174,7 +174,7 @@ export function ChainTokenPill({
                       <p className="text-[10px] text-[var(--color-text-secondary)] truncate">{t.name}</p>
                     </div>
                     {token?.address === t.address && (
-                      <svg className="ml-auto w-4 h-4 text-[#d0bcff]" viewBox="0 0 20 20" fill="currentColor">
+                      <svg className="ml-auto w-4 h-4 text-[var(--color-primary)]" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                     )}

@@ -93,7 +93,7 @@ export function SwapCard({ onSwapSuccess, initialFromToken }: SwapCardProps) {
             <span className={`text-[10px] px-2 py-0.5 rounded-full font-label ${
               quote.swapType === "same-chain"
                 ? "bg-emerald-500/10 text-emerald-400"
-                : "bg-[#d0bcff]/10 text-[#d0bcff]"
+                : "bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
             }`}>
               {quote.swapType === "same-chain" ? "On-chain Swap" : "Cross-chain Bridge"}
             </span>
@@ -150,7 +150,7 @@ export function SwapCard({ onSwapSuccess, initialFromToken }: SwapCardProps) {
               flex items-center justify-center hover:bg-[var(--color-surface)] transition-all duration-200 group"
           >
             <svg
-              className="w-4 h-4 text-[var(--color-text-secondary)] group-hover:text-[#d0bcff] transition-all duration-200
+              className="w-4 h-4 text-[var(--color-text-secondary)] group-hover:text-[var(--color-primary)] transition-all duration-200
                 rotate-90 md:rotate-0 group-hover:translate-y-0.5 md:group-hover:translate-y-0 md:group-hover:translate-x-0.5"
               fill="none" stroke="currentColor" viewBox="0 0 24 24"
             >
@@ -228,7 +228,7 @@ export function SwapCard({ onSwapSuccess, initialFromToken }: SwapCardProps) {
           fromChain={fromChain}
           toChain={toChain}
           amount={amount}
-          minAmountOut={quote?.outputAmount || "0"}
+          minAmountOut={(parseFloat(quote?.outputAmount || "0") * 0.99).toString()}
           poolFee={quote?.uniswapFeeTier || 500}
           disabled={!quote || quoteLoading || !!quoteError}
           onSuccess={handleSuccess}

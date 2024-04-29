@@ -15,13 +15,12 @@ interface ChainSelectorProps {
 const CHAIN_ICONS: Record<string, string> = {
   Sepolia: "/chains/Sepolia eth.png",
   Amoy: "/chains/Amoy-polygon.webp",
-  "BSC Testnet": "/chains/BSC-BNB.png",
 };
 
 const CHAIN_COLORS: Record<string, string> = {
   Sepolia: "#3b82f6",
   Amoy: "#8b5cf6",
-  "BSC Testnet": "#f59e0b",
+  // "BSC Testnet": "#f59e0b",
 };
 
 export function ChainSelector({ selectedChain, onSelect, excludeChainId, label }: ChainSelectorProps) {
@@ -34,7 +33,7 @@ export function ChainSelector({ selectedChain, onSelect, excludeChainId, label }
         onClick={() => setIsOpen(true)}
         className="flex items-center gap-1.5 px-2 md:px-3 py-2 md:py-2.5 rounded-full w-full
           bg-[var(--color-surface-low)] border border-[var(--color-border)]
-          hover:border-[#d0bcff]/30 transition-colors text-left min-w-0"
+          hover:border-[var(--color-primary)]/30 transition-colors text-left min-w-0"
       >
         {selectedChain ? (
           <>
@@ -58,7 +57,7 @@ export function ChainSelector({ selectedChain, onSelect, excludeChainId, label }
       {/* Modal Overlay via Portal */}
       {isOpen && typeof window !== "undefined" ? createPortal(
         <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 200 }}>
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
+          <div className="absolute inset-0 bg-[var(--color-overlay)] backdrop-blur-sm" onClick={() => setIsOpen(false)} />
 
           <div className="relative w-full max-w-[calc(100vw-2rem)] md:max-w-[400px] bg-[var(--color-surface-low)] border border-[var(--color-border)] rounded-3xl overflow-hidden shadow-2xl">
             {/* Header */}
@@ -81,8 +80,8 @@ export function ChainSelector({ selectedChain, onSelect, excludeChainId, label }
                   key={chain.id}
                   onClick={() => { onSelect(chain); setIsOpen(false); }}
                   className={`flex items-center gap-4 w-full px-4 py-3.5 rounded-2xl text-left transition-all
-                    hover:bg-white/5
-                    ${selectedChain?.id === chain.id ? "bg-[#d0bcff]/10 border border-[#d0bcff]/20" : "border border-transparent"}`}
+                    hover:bg-[var(--color-primary)]/5
+                    ${selectedChain?.id === chain.id ? "bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20" : "border border-transparent"}`}
                 >
                   <img
                     src={CHAIN_ICONS[chain.name]}
@@ -94,7 +93,7 @@ export function ChainSelector({ selectedChain, onSelect, excludeChainId, label }
                     <p className="text-xs text-[var(--color-text-secondary)]">Chain ID: {chain.id}</p>
                   </div>
                   {selectedChain?.id === chain.id && (
-                    <svg className="w-5 h-5 text-[#d0bcff] shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <svg className="w-5 h-5 text-[var(--color-primary)] shrink-0" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   )}

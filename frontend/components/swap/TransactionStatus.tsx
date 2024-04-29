@@ -142,12 +142,12 @@ export function TransactionStatus({ txHash, srcChain, dstChain, onClose }: Trans
 
       {isSameChain && isComplete && (
         <a
-          href={`https://sepolia.etherscan.io/tx/${txHash}`}
+          href={`${srcChain === "amoy" ? "https://amoy.polygonscan.com" : srcChain === "bsc" ? "https://testnet.bscscan.com" : "https://sepolia.etherscan.io"}/tx/${txHash}`}
           target="_blank"
           rel="noopener noreferrer"
           className="block mt-4 text-center text-xs text-primary-400 hover:text-primary-300 transition-colors"
         >
-          View on Etherscan
+          View on Explorer
         </a>
       )}
 

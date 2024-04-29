@@ -15,12 +15,12 @@ export const SUPPORTED_CHAINS: Chain[] = [
     symbol: "MATIC",
     logo: "/chains/polygon.svg",
   },
-  {
-    id: 97,
-    name: "BSC Testnet",
-    symbol: "BNB",
-    logo: "/chains/bnb.svg",
-  },
+  // {
+  //   id: 97,
+  //   name: "BSC Testnet",
+  //   symbol: "BNB",
+  //   logo: "/chains/bnb.svg",
+  // },
 ];
 
 export const PROTOCOL_FEE_BPS = 30;
