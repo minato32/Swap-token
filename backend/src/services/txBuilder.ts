@@ -17,13 +17,14 @@ interface SwapTransaction {
   value: string;
   chainId: number;
   gasLimit: string;
-  maxFeePerGas: string;
-  maxPriorityFeePerGas: string;
+  maxFeePerGas?: string;
+  maxPriorityFeePerGas?: string;
   needsWethWrap?: boolean;
   wethAddress?: string;
   swapRouterAddress?: string;
   tokenIn?: string;
   parsedAmount?: string;
+  decodedArgs?: (string | number)[];
 }
 
 function buildSameChainSwapTransaction(
@@ -36,6 +37,7 @@ function buildSameChainSwapTransaction(
 ): SwapTransaction {
   const chainConfig = getChainConfig(chain);
   if (!chainConfig) throw new Error("Unsupported chain");
+  if (!chainConfig.quoterV2Address) throw new Error("Same-chain swaps are not available on this network. No DEX liquidity.");
 
   const contractAddress = chainConfig.swapRouterAddress || "0x0000000000000000000000000000000000000001";
 
@@ -108,28 +110,78 @@ export async function buildSwapTransaction(
 
   const contractAddress = sourceChain.swapRouterAddress || "0x0000000000000000000000000000000000000001";
 
+  const needsWethWrap = fromToken.toLowerCase() === NATIVE_ADDRESS;
+  const resolvedFromToken = needsWethWrap && sourceChain.wethAddress
+    ? ethers.getAddress(sourceChain.wethAddress.toLowerCase())
+    : fromToken;
+
+  const resolvedToToken = toToken.toLowerCase() === NATIVE_ADDRESS && destChain.wethAddress
+    ? ethers.getAddress(destChain.wethAddress.toLowerCase())
+    : toToken;
+
   const swapRouter = new ethers.Interface(SWAP_AND_BRIDGE_ABI);
 
   const parsedAmount = ethers.parseUnits(amount, 18);
   const parsedMinOut = ethers.parseUnits(minAmountOut, 18);
 
+  // LayerZero V2 executor options: Type 3, worker=1, lzReceive gas=300000
+  const lzOptions = "0x000301001101000000000000000000000000000493e0";
+
+  // Query actual LayerZero messaging fee from BridgeAdapter
+  const provider = new ethers.JsonRpcProvider(sourceChain.rpcUrl);
+  const bridgeAdapter = new ethers.Contract(
+    sourceChain.bridgeAdapterAddress,
+    ["function quoteBridgeFee(uint32,address,uint256,address,bytes32,bytes) view returns (tuple(uint256 nativeFee, uint256 lzTokenFee))"],
+    provider
+  );
+
+  let lzFee: bigint;
+  try {
+    const fee = await bridgeAdapter.quoteBridgeFee(
+      destChain.lzChainId,
+      resolvedFromToken,
+      parsedAmount,
+      recipient,
+      ethers.zeroPadValue("0x01", 32),
+      lzOptions
+    );
+    lzFee = (fee.nativeFee * 500n) / 100n; // 5x buffer (excess refunded by LZ)
+    console.log(`[TxBuilder] LZ fee: ${ethers.formatEther(fee.nativeFee)} × 5 = ${ethers.formatEther(lzFee)}`);
+  } catch (err) {
+    throw new Error("Unable to estimate LayerZero bridge fee. Please try again later.");
+  }
+
   const data = swapRouter.encodeFunctionData("swapAndBridge", [
-    fromToken,
-    toToken,
+    resolvedFromToken,
+    resolvedToToken,
     parsedAmount,
     destChain.lzChainId,
     recipient,
     parsedMinOut,
-    "0x",
+    lzOptions,
   ]);
 
   return {
     to: contractAddress,
     data,
-    value: ethers.parseEther("0.01").toString(),
+    value: lzFee.toString(),
     chainId: sourceChain.chainId,
-    gasLimit: "300000",
+    gasLimit: "800000",
     maxFeePerGas: "30000000000",
     maxPriorityFeePerGas: "2000000000",
+    needsWethWrap,
+    wethAddress: sourceChain.wethAddress,
+    swapRouterAddress: contractAddress,
+    tokenIn: resolvedFromToken,
+    parsedAmount: parsedAmount.toString(),
+    decodedArgs: [
+      resolvedFromToken,
+      resolvedToToken,
+      parsedAmount.toString(),
+      destChain.lzChainId,
+      recipient,
+      parsedMinOut.toString(),
+      lzOptions,
+    ],
   };
 }
