@@ -9,8 +9,8 @@ export function Hero3DArt() {
     { color: "#3b82f6", size: 50, x: "85%", y: "55%", delay: 0.6 },
     { color: "#f59e0b", size: 45, x: "10%", y: "65%", delay: 0.9 },
     { color: "#10b981", size: 55, x: "60%", y: "75%", delay: 1.2 },
-    { color: "#d0bcff", size: 35, x: "40%", y: "10%", delay: 0.5 },
-    { color: "#ffb0cd", size: 40, x: "30%", y: "80%", delay: 0.8 },
+    { color: "var(--color-primary)", size: 35, x: "40%", y: "10%", delay: 0.5 },
+    { color: "var(--color-secondary)", size: 40, x: "30%", y: "80%", delay: 0.8 },
   ];
 
   return (

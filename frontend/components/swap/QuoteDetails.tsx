@@ -53,7 +53,7 @@ export function QuoteDetails({ quote, fromSymbol, toSymbol }: QuoteDetailsProps)
                 <span className="text-[var(--color-text-secondary)]">Protocol Fee</span>
                 <div className="flex items-center gap-1.5">
                   <span className="text-[var(--color-text-primary)]">{quote.protocolFee} {toSymbol}</span>
-                  <span className="px-1 py-0.5 rounded bg-[#d0bcff]/10 text-[#d0bcff] font-label text-[9px]">
+                  <span className="px-1 py-0.5 rounded bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-label text-[9px]">
                     {quote.feeTierLabel}
                   </span>
                 </div>
@@ -115,7 +115,7 @@ function EstimatedTimeRow({ estimatedTime }: { estimatedTime: string }) {
           {estimatedTime}
         </span>
         {seconds > 0 && (
-          <span className="font-label text-[10px] px-1.5 py-0.5 rounded bg-[#d0bcff]/10 text-[#d0bcff] tabular-nums">
+          <span className="font-label text-[10px] px-1.5 py-0.5 rounded bg-[var(--color-primary)]/10 text-[var(--color-primary)] tabular-nums">
             {String(minutes).padStart(2, "0")}:{String(secs).padStart(2, "0")}
           </span>
         )}

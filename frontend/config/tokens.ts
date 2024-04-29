@@ -31,40 +31,15 @@ export const SUPPORTED_TOKENS: Record<number, Token[]> = {
   // Amoy (ChainID: 80002)
   80002: [
     {
-      symbol: "MATIC",
-      name: "Polygon",
-      address: "0x0000000000000000000000000000000000000000",
+      symbol: "XCTT",
+      name: "CrossChain Test Token",
+      address: "0x57dE85325fb30402AeeF473487B43EcacB544dfE",
       decimals: 18,
-      logo: "/tokens/matic.svg",
-      chainId: 80002,
-    },
-    {
-      symbol: "USDC",
-      name: "USD Coin",
-      address: "0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582",
-      decimals: 6,
-      logo: "/tokens/usdc.svg",
+      logo: "/tokens/xctt.svg",
       chainId: 80002,
     },
   ],
 
-  // BSC Testnet (ChainID: 97)
-  97: [
-    {
-      symbol: "BNB",
-      name: "BNB",
-      address: "0x0000000000000000000000000000000000000000",
-      decimals: 18,
-      logo: "/tokens/bnb.svg",
-      chainId: 97,
-    },
-    {
-      symbol: "USDC",
-      name: "USD Coin",
-      address: "0x64544969ed7EBf5f083679233325356EbE738930",
-      decimals: 18,
-      logo: "/tokens/usdc.svg",
-      chainId: 97,
-    },
-  ],
+  // BSC Testnet (ChainID: 97) — not deployed yet
+  // 97: [],
 };

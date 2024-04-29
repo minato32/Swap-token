@@ -9,7 +9,7 @@ import {
   useReadContract,
 } from "wagmi";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
-import { parseUnits, parseGwei, maxUint256, erc20Abi, getAddress } from "viem";
+import { parseUnits, maxUint256, erc20Abi, getAddress } from "viem";
 import { waitForTransactionReceipt } from "wagmi/actions";
 import { wagmiConfig } from "@/config/wagmi";
 import { API_BASE_URL } from "@/lib/constants";
@@ -101,7 +101,6 @@ export function SwapButton({
       const chainMap: Record<number, string> = {
         11155111: "sepolia",
         80002: "amoy",
-        97: "bsc",
       };
 
       const res = await fetch(`${API_BASE_URL}/swap`, {
@@ -126,6 +125,11 @@ export function SwapButton({
       }
 
       const txData = data.data;
+
+      if (!txData.swapRouterAddress || !txData.tokenIn) {
+        throw new Error("Missing contract addresses. Restart the backend to reload configuration.");
+      }
+
       const routerAddr = getAddress(txData.swapRouterAddress) as `0x${string}`;
       const resolvedTokenIn = getAddress(txData.tokenIn) as `0x${string}`;
       const parsedAmount = BigInt(txData.parsedAmount || parseUnits(amount, 18).toString());
@@ -144,10 +148,8 @@ export function SwapButton({
           abi: WETH_ABI,
           functionName: "deposit",
           value: parsedAmount,
-          maxFeePerGas: parseGwei("50"),
-          maxPriorityFeePerGas: parseGwei("30"),
         });
-        await waitForTransactionReceipt(wagmiConfig, { hash: wrapHash });
+        await waitForTransactionReceipt(wagmiConfig, { hash: wrapHash, timeout: 120_000 });
 
         needsApproval = true;
       } else {
@@ -162,22 +164,57 @@ export function SwapButton({
           abi: erc20Abi,
           functionName: "approve",
           args: [routerAddr, maxUint256],
-          maxFeePerGas: parseGwei("50"),
-          maxPriorityFeePerGas: parseGwei("30"),
         });
-        await waitForTransactionReceipt(wagmiConfig, { hash: approveHash });
+        await waitForTransactionReceipt(wagmiConfig, { hash: approveHash, timeout: 120_000 });
       }
 
       setStep("confirming");
 
-      const hash = await sendTransactionAsync({
-        to: txData.to as `0x${string}`,
-        data: txData.data as `0x${string}`,
-        value: BigInt(txData.value || "0"),
-        gas: BigInt(txData.gasLimit),
-        maxFeePerGas: parseGwei("50"),
-        maxPriorityFeePerGas: parseGwei("30"),
-      });
+      const isCrossChain = fromChain?.id !== toChain?.id;
+      let hash: `0x${string}`;
+
+      if (isCrossChain) {
+        const SWAP_AND_BRIDGE_ABI = [{
+          name: "swapAndBridge",
+          type: "function",
+          stateMutability: "payable",
+          inputs: [
+            { name: "token", type: "address" },
+            { name: "toToken", type: "address" },
+            { name: "amount", type: "uint256" },
+            { name: "destEid", type: "uint32" },
+            { name: "recipient", type: "address" },
+            { name: "minAmountOut", type: "uint256" },
+            { name: "options", type: "bytes" },
+          ],
+          outputs: [],
+        }] as const;
+
+        const args = txData.decodedArgs;
+        hash = await writeContractAsync({
+          address: txData.to as `0x${string}`,
+          abi: SWAP_AND_BRIDGE_ABI,
+          functionName: "swapAndBridge",
+          args: [
+            args[0] as `0x${string}`,       // token
+            args[1] as `0x${string}`,       // toToken
+            BigInt(args[2]),                 // amount
+            Number(args[3]),                 // destEid
+            args[4] as `0x${string}`,       // recipient
+            BigInt(args[5]),                 // minAmountOut
+            args[6] as `0x${string}`,       // options
+          ],
+          value: BigInt(txData.value || "0"),
+          gas: BigInt(txData.gasLimit),
+        });
+      } else {
+        hash = await sendTransactionAsync({
+          to: txData.to as `0x${string}`,
+          data: txData.data as `0x${string}`,
+          value: BigInt(txData.value || "0"),
+          gas: BigInt(txData.gasLimit),
+        });
+      }
 
       setTxHash(hash);
       setStep("submitted");
@@ -186,8 +223,16 @@ export function SwapButton({
       setStep("error");
       if (err.message?.includes("User rejected") || err.message?.includes("denied")) {
         setError("Transaction rejected by user");
+      } else if (err.message?.includes("insufficient funds") || err.message?.includes("Insufficient")) {
+        setError("Insufficient balance for this transaction");
+      } else if (err.message?.includes("LayerZero") || err.message?.includes("bridge fee")) {
+        setError("Unable to estimate bridge fee. Please try again.");
+      } else if (err.message?.includes("Price data unavailable")) {
+        setError("Price data unavailable. Please try again later.");
+      } else if (err.message?.includes("Same-chain swaps")) {
+        setError("Same-chain swaps not available on this network.");
       } else {
-        setError(err.message || "Swap failed");
+        setError("Swap failed. Please try again.");
       }
     }
   }

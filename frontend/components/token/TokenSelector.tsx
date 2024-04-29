@@ -46,8 +46,8 @@ export function TokenSelector({ chainId, selectedToken, onSelect, excludeAddress
         onClick={() => setIsOpen(true)}
         className={`flex items-center gap-2 shrink-0 rounded-full transition-colors
           ${selectedToken
-            ? "px-3 py-2.5 bg-[var(--color-surface-low)] border border-[var(--color-border)] hover:border-[#d0bcff]/30"
-            : "px-4 py-2.5 bg-[#d0bcff] text-black hover:bg-[#c4a8ff]"
+            ? "px-3 py-2.5 bg-[var(--color-surface-low)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/30"
+            : "px-4 py-2.5 bg-[var(--color-primary)] text-black hover:bg-[var(--color-primary)]"
           }`}
       >
         {selectedToken ? (
@@ -68,7 +68,7 @@ export function TokenSelector({ chainId, selectedToken, onSelect, excludeAddress
       {/* Modal Overlay via Portal */}
       {isOpen && typeof window !== "undefined" ? createPortal(
         <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 200 }}>
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
+          <div className="absolute inset-0 bg-[var(--color-overlay)] backdrop-blur-sm" onClick={() => setIsOpen(false)} />
 
           <div className="relative w-full max-w-[calc(100vw-2rem)] md:max-w-[400px] bg-[var(--color-surface-low)] border border-[var(--color-border)] rounded-3xl overflow-hidden shadow-2xl">
             {/* Header */}
@@ -99,7 +99,7 @@ export function TokenSelector({ chainId, selectedToken, onSelect, excludeAddress
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 rounded-2xl text-sm bg-[var(--color-surface)] border border-[var(--color-border)]
                     text-[var(--color-text-primary)] placeholder:text-[var(--color-text-secondary)]
-                    focus:outline-none focus:border-[#d0bcff]/40"
+                    focus:outline-none focus:border-[var(--color-primary)]/40"
                 />
               </div>
             </div>
@@ -113,8 +113,8 @@ export function TokenSelector({ chainId, selectedToken, onSelect, excludeAddress
                     onClick={() => { onSelect(token); setIsOpen(false); }}
                     className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-colors
                       ${selectedToken?.address === token.address
-                        ? "bg-[#d0bcff]/10 border-[#d0bcff]/30"
-                        : "bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[#d0bcff]/20"
+                        ? "bg-[var(--color-primary)]/10 border-[var(--color-primary)]/30"
+                        : "bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-primary)]/20"
                       }`}
                   >
                     <TokenIcon symbol={token.symbol} size={20} />
@@ -174,8 +174,8 @@ function TokenRow({
     <button
       onClick={onSelect}
       className={`flex items-center gap-4 w-full px-4 py-3.5 rounded-2xl text-left transition-all
-        hover:bg-white/5
-        ${isSelected ? "bg-[#d0bcff]/10" : ""}`}
+        hover:bg-[var(--color-primary)]/5
+        ${isSelected ? "bg-[var(--color-primary)]/10" : ""}`}
     >
       <TokenIcon symbol={token.symbol} size={40} />
 
