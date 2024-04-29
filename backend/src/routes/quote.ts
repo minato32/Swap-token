@@ -64,7 +64,7 @@ router.get("/stream", validateQuote, (req: Request, res: Response) => {
     "Content-Type": "text/event-stream",
     "Cache-Control": "no-cache",
     Connection: "keep-alive",
-    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": process.env.FRONTEND_URL || "http://localhost:3000",
   });
 
   let lastSent = 0;
@@ -78,7 +78,9 @@ router.get("/stream", validateQuote, (req: Request, res: Response) => {
     try {
       const quote = await getQuote(fromToken, toToken, amount, fromChain, toChain);
       res.write(`data: ${JSON.stringify(quote)}\n\n`);
-    } catch {}
+    } catch (err: any) {
+      res.write(`event: error\ndata: ${JSON.stringify({ error: err.message || "Quote unavailable" })}\n\n`);
+    }
   }
 
   sendQuote();

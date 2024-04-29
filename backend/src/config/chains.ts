@@ -40,7 +40,7 @@ const CHAINS: Record<string, ChainConfig> = {
     tokenVaultAddress: process.env.TOKEN_VAULT_AMOY_ADDRESS || "",
     feeManagerAddress: process.env.FEE_MANAGER_AMOY_ADDRESS || "",
     lzChainId: 40267,
-    wethAddress: "",
+    wethAddress: "0x360ad4f9a9A8EFe9A8DCB5f461c4Cc1047E1Dcf9",
     quoterV2Address: "",
     nativeSymbol: "MATIC",
   },

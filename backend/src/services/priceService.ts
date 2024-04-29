@@ -29,7 +29,7 @@ async function getLiveExchangeRate(
     return { value: cgRate, source: "coingecko" };
   }
 
-  return { value: 0.997, source: "fallback" };
+  throw new Error("Price data unavailable. All sources (Binance, CoinGecko) failed.");
 }
 
 async function getLiveUsdPrice(symbol: string): Promise<number | null> {

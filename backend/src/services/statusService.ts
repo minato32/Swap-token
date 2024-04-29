@@ -105,7 +105,7 @@ async function checkStatus(
     return buildResult(txHash, srcChain, dstChain, "DELIVERED", confirmations);
   }
 
-  if (confirmations < 12) {
+  if (confirmations < 2) {
     return buildResult(txHash, srcChain, dstChain, "SOURCE_CONFIRMED", confirmations);
   }
 
