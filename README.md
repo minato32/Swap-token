@@ -1,5 +1,7 @@
 # CrossChain Swap System
 
+![Interface](frontend/public/UI/Interface.png)
+
 A production-grade decentralized cross-chain token swap protocol enabling seamless token swaps across multiple blockchain networks. Supports **same-chain DEX swaps** via Uniswap V3 and **cross-chain bridges** via LayerZero V2, with real-time pricing powered by Binance WebSocket.
 
 ## Overview
@@ -28,6 +30,10 @@ User → Wrap ETH → Approve WETH → SwapRouter.swapOnChain()
   → Uniswap V3 exactInputSingle() → Tokens sent to user (~30 sec)
 ```
 
+### Same-Chain Swap Interface
+![Same Chain Swap](frontend/public/UI/Same%20chain%20Swap.png)
+![Same Chain Swapping](frontend/public/UI/Same%20chain%20Swaping.png)
+
 ### Cross-Chain Flow (LayerZero V2)
 
 ```
@@ -36,6 +42,10 @@ User → Wrap ETH → Approve WETH → SwapRouter.swapAndBridge()
   → BridgeAdapter → LayerZero V2 → Destination BridgeAdapter
   → TokenVault.releaseBridgedTokens() → Tokens to user (2-5 min)
 ```
+
+### Cross-Chain Bridge Interface
+![Cross Chain Swap](frontend/public/UI/Cross%20chain%20swap.png)
+![Cross Chain Swapping](frontend/public/UI/Cross%20chain%20swapping.png)
 
 ### Fee Structure
 
