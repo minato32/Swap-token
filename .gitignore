@@ -41,5 +41,4 @@ coverage.json
 
 # Local config
 .brain/
-.claude/
 *.local.json
