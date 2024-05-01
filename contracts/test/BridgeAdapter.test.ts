@@ -70,6 +70,7 @@ describe("BridgeAdapter", function () {
           ethers.parseEther("100"),
           user.address,
           DEPOSIT_ID,
+          swapRouterSigner.address,
           "0x",
           { value: LZ_FEE }
         )
@@ -86,6 +87,7 @@ describe("BridgeAdapter", function () {
           ethers.parseEther("100"),
           user.address,
           DEPOSIT_ID,
+          user.address,
           "0x",
           { value: LZ_FEE }
         )
@@ -102,6 +104,7 @@ describe("BridgeAdapter", function () {
           ethers.parseEther("100"),
           user.address,
           DEPOSIT_ID,
+          swapRouterSigner.address,
           "0x",
           { value: LZ_FEE }
         )
@@ -115,16 +118,18 @@ describe("BridgeAdapter", function () {
         await loadFixture(deployFullFixture);
 
       const amount = ethers.parseEther("100");
+      const tokenAddr = await token.getAddress();
+      const vaultAddr = await tokenVault.getAddress();
+
+      await bridgeAdapter.setTokenMapping(tokenAddr, tokenAddr);
+      await token.mint(owner.address, ethers.parseEther("5000"));
+      await token.connect(owner).approve(vaultAddr, ethers.parseEther("5000"));
+      await tokenVault.fundBridgeReserve(tokenAddr, ethers.parseEther("5000"));
+
       const depositId = ethers.keccak256(ethers.toUtf8Bytes("receive-test-1"));
-
-      await tokenVault.setSwapRouter(owner.address);
-      await token.connect(owner).approve(await tokenVault.getAddress(), amount);
-      await token.mint(owner.address, amount);
-      await tokenVault.lockTokens(depositId, await token.getAddress(), amount, owner.address);
-
       const payload = ethers.AbiCoder.defaultAbiCoder().encode(
         ["address", "uint256", "address", "bytes32"],
-        [await token.getAddress(), amount, user.address, depositId]
+        [tokenAddr, amount, user.address, depositId]
       );
 
       const senderBytes32 = ethers.zeroPadValue(await bridgeAdapter.getAddress(), 32);
@@ -148,16 +153,18 @@ describe("BridgeAdapter", function () {
         await loadFixture(deployFullFixture);
 
       const amount = ethers.parseEther("50");
+      const tokenAddr = await token.getAddress();
+      const vaultAddr = await tokenVault.getAddress();
       const depositId = ethers.keccak256(ethers.toUtf8Bytes("replay-test"));
 
-      await tokenVault.setSwapRouter(owner.address);
-      await token.mint(owner.address, amount);
-      await token.connect(owner).approve(await tokenVault.getAddress(), amount);
-      await tokenVault.lockTokens(depositId, await token.getAddress(), amount, owner.address);
+      await bridgeAdapter.setTokenMapping(tokenAddr, tokenAddr);
+      await token.mint(owner.address, ethers.parseEther("5000"));
+      await token.connect(owner).approve(vaultAddr, ethers.parseEther("5000"));
+      await tokenVault.fundBridgeReserve(tokenAddr, ethers.parseEther("5000"));
 
       const payload = ethers.AbiCoder.defaultAbiCoder().encode(
         ["address", "uint256", "address", "bytes32"],
-        [await token.getAddress(), amount, user.address, depositId]
+        [tokenAddr, amount, user.address, depositId]
       );
 
       const senderBytes32 = ethers.zeroPadValue(await bridgeAdapter.getAddress(), 32);

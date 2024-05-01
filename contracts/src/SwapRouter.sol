@@ -18,6 +18,7 @@ interface IBridgeAdapter {
         uint256 _amount,
         address _recipient,
         bytes32 _depositId,
+        address _refundAddress,
         bytes calldata _options
     ) external payable;
 }
@@ -165,14 +166,14 @@ contract SwapRouter is Ownable, ReentrancyGuard, Pausable {
 
         depositNonce++;
         bytes32 depositId = keccak256(
-            abi.encodePacked(block.chainid, msg.sender, token, amountAfterFee, depositNonce)
+            abi.encodePacked(block.chainid, msg.sender, token, amountAfterFee, depositNonce, block.timestamp)
         );
 
         IERC20(token).forceApprove(tokenVault, amountAfterFee);
         ITokenVault(tokenVault).lockTokens(depositId, token, amountAfterFee, msg.sender);
 
         IBridgeAdapter(bridgeAdapter).sendBridgeMessage{value: msg.value}(
-            destEid, token, amountAfterFee, recipient, depositId, options
+            destEid, token, amountAfterFee, recipient, depositId, msg.sender, options
         );
 
         emit SwapInitiated(
