@@ -61,7 +61,8 @@ function buildSameChainSwapTransaction(
 
   const iface = new ethers.Interface(SWAP_ON_CHAIN_ABI);
   const parsedAmount = ethers.parseUnits(amount, fromDecimals);
-  const parsedMinOut = ethers.parseUnits(minAmountOut, toDecimals);
+  const truncatedMinOut = parseFloat(minAmountOut).toFixed(toDecimals);
+  const parsedMinOut = ethers.parseUnits(truncatedMinOut, toDecimals);
   const data = iface.encodeFunctionData("swapOnChain", [
     resolvedFromToken,
     resolvedToToken,
@@ -122,7 +123,8 @@ export async function buildSwapTransaction(
   const swapRouter = new ethers.Interface(SWAP_AND_BRIDGE_ABI);
 
   const parsedAmount = ethers.parseUnits(amount, 18);
-  const parsedMinOut = ethers.parseUnits(minAmountOut, 18);
+  const truncatedMinOut = parseFloat(minAmountOut).toFixed(18);
+  const parsedMinOut = ethers.parseUnits(truncatedMinOut, 18);
 
   // LayerZero V2 executor options: Type 3, worker=1, lzReceive gas=300000
   const lzOptions = "0x000301001101000000000000000000000000000493e0";

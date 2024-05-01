@@ -26,8 +26,16 @@ export function errorHandler(
 
   console.error("Unhandled error:", err);
 
+  const safeMessages = [
+    "Price data unavailable",
+    "Unable to estimate LayerZero bridge fee",
+    "Same-chain swaps are not available",
+  ];
+
+  const userMessage = safeMessages.find((m) => err.message?.includes(m)) || "Internal server error";
+
   res.status(500).json({
     success: false,
-    error: "Internal server error",
+    error: userMessage,
   });
 }
