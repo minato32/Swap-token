@@ -168,7 +168,7 @@ export async function buildSwapTransaction(
     data,
     value: lzFee.toString(),
     chainId: sourceChain.chainId,
-    gasLimit: "800000",
+    gasLimit: "2000000",
     maxFeePerGas: "30000000000",
     maxPriorityFeePerGas: "2000000000",
     needsWethWrap,

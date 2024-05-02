@@ -1,21 +1,22 @@
 import { http, createConfig } from "wagmi";
 import { sepolia, polygonAmoy } from "wagmi/chains";
-import { injected } from "wagmi/connectors";
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
-import { metaMaskWallet } from "@rainbow-me/rainbowkit/wallets";
+import { injectedWallet, metaMaskWallet } from "@rainbow-me/rainbowkit/wallets";
 
 export const SUPPORTED_CHAINS = [sepolia, polygonAmoy] as const;
+
+const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "04b09f045a3f50de5cf1e6940b888a43";
 
 const connectors = connectorsForWallets(
   [
     {
       groupName: "Recommended",
-      wallets: [metaMaskWallet],
+      wallets: [injectedWallet, metaMaskWallet],
     },
   ],
   {
     appName: "CrossChain Swap",
-    projectId: "disabled",
+    projectId,
   }
 );
 
