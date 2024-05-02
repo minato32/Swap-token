@@ -28,7 +28,7 @@ export default function Home() {
   };
 
   return (
-    <main className="relative min-h-screen md:h-screen pt-14 md:pt-16 flex flex-col bg-[var(--color-surface-lowest)] text-[var(--color-text-primary)] overflow-x-hidden overflow-y-auto md:overflow-hidden font-body">
+    <main className="relative min-h-screen pt-14 md:pt-16 flex flex-col bg-[var(--color-surface-lowest)] text-[var(--color-text-primary)] overflow-x-hidden overflow-y-auto font-body">
       {/* Ambient Background */}
       <div className="fixed inset-0 -z-10 pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-[#8b5cf6]/[0.06] blur-[160px]" />
