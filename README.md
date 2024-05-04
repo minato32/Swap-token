@@ -314,6 +314,4 @@ On testnet, the destination token for cross-chain swaps is XCTT (CrossChain Test
 
 On mainnet, the vault would be funded with real tokens (WMATIC, USDC) by liquidity providers, and Uniswap V3 pools would be available on all supported chains. The bridge infrastructure is identical — swapping XCTT for WMATIC is a one-line config change: `setTokenMapping(WETH, WMATIC)`.
 
-## License
 
-MIT
